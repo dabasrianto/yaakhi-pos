@@ -8,7 +8,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { settings } = useSettings();
+  const { settings, isDarkMode, translations } = useSettings();
   
   // Close sidebar when clicking on navigation item on mobile
   const handleNavClick = (pageId: string) => {
@@ -22,38 +22,38 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
     { 
       id: 'dashboard-page', 
       icon: 'lni lni-dashboard', 
-      label: 'Dashboard',
-      tooltip: 'Lihat ringkasan bisnis dan statistik hari ini'
+      label: translations.dashboard,
+      tooltip: settings.language === 'en' ? 'View business summary and today\'s statistics' : 'Lihat ringkasan bisnis dan statistik hari ini'
     },
     { 
       id: 'pos-page', 
       icon: 'lni lni-calculator', 
-      label: 'Kasir',
-      tooltip: 'Sistem Point of Sale untuk transaksi penjualan'
+      label: translations.pos,
+      tooltip: settings.language === 'en' ? 'Point of Sale system for sales transactions' : 'Sistem Point of Sale untuk transaksi penjualan'
     },
     { 
       id: 'inventory-page', 
       icon: 'lni lni-package', 
-      label: 'Inventori',
-      tooltip: 'Kelola stok produk dan laporan inventori'
+      label: translations.inventory,
+      tooltip: settings.language === 'en' ? 'Manage product stock and inventory reports' : 'Kelola stok produk dan laporan inventori'
     },
     { 
       id: 'customer-page', 
       icon: 'lni lni-users', 
-      label: 'Pelanggan',
-      tooltip: 'Manajemen data pelanggan dan riwayat transaksi'
+      label: translations.customers,
+      tooltip: settings.language === 'en' ? 'Customer data management and transaction history' : 'Manajemen data pelanggan dan riwayat transaksi'
     },
     { 
       id: 'reports-page', 
       icon: 'lni lni-bar-chart', 
-      label: 'Laporan',
-      tooltip: 'Analisis penjualan dan laporan keuangan'
+      label: translations.reports,
+      tooltip: settings.language === 'en' ? 'Sales analysis and financial reports' : 'Analisis penjualan dan laporan keuangan'
     },
     { 
       id: 'settings-page', 
       icon: 'lni lni-cog', 
-      label: 'Pengaturan',
-      tooltip: 'Konfigurasi aplikasi dan pengaturan sistem'
+      label: translations.settings,
+      tooltip: settings.language === 'en' ? 'Application configuration and system settings' : 'Konfigurasi aplikasi dan pengaturan sistem'
     }
   ];
 
@@ -69,13 +69,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
       
       {/* Sidebar */}
       <div className={`
-        fixed left-0 top-0 h-full bg-white shadow-lg z-[70] transition-all duration-300 ease-in-out lg:relative lg:z-auto
+        fixed left-0 top-0 h-full ${isDarkMode ? 'bg-dark-surface' : 'bg-white'} shadow-lg z-[70] transition-all duration-300 ease-in-out lg:relative lg:z-auto
         ${isExpanded ? 'w-64' : 'w-16'}
         flex flex-col lg:translate-x-0
         ${!isExpanded && window.innerWidth < 1024 ? '-translate-x-full' : 'translate-x-0'}
       `}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+        <div className={`flex items-center justify-between p-4 border-b ${isDarkMode ? 'border-gray-600' : 'border-slate-200'}`}>
           <div className={`flex items-center gap-3 transition-opacity duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>
             {settings.logoUrl ? (
               <img 
@@ -91,15 +91,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
             <div className={`w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 ${settings.logoUrl ? 'hidden' : ''}`}>
               <i className="lni lni-store text-lg"></i>
             </div>
-            {isExpanded && <span className="font-bold text-lg text-slate-800">{settings.storeName}</span>}
+            {isExpanded && <span className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{settings.storeName}</span>}
           </div>
           
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-            title={isExpanded ? 'Tutup Menu' : 'Buka Menu'}
+            className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-slate-100'} transition-colors`}
+            title={isExpanded ? (settings.language === 'en' ? 'Close Menu' : 'Tutup Menu') : (settings.language === 'en' ? 'Open Menu' : 'Buka Menu')}
           >
-            <i className={`lni ${isExpanded ? 'lni-chevron-left' : 'lni-menu'} text-slate-600`}></i>
+            <i className={`lni ${isExpanded ? 'lni-chevron-left' : 'lni-menu'} ${isDarkMode ? 'text-gray-300' : 'text-slate-600'}`}></i>
           </button>
         </div>
 
@@ -114,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
                 w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200
                 ${currentPage === item.id 
                   ? `text-white border-r-2` 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                  : `${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`
                 }
               `}
               style={currentPage === item.id ? { 
@@ -134,9 +134,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-200">
+        <div className={`p-4 border-t ${isDarkMode ? 'border-gray-600' : 'border-slate-200'}`}>
           <div className={`
-            text-xs text-slate-500 transition-opacity duration-300
+            text-xs ${isDarkMode ? 'text-gray-400' : 'text-slate-500'} transition-opacity duration-300
             ${isExpanded ? 'opacity-100' : 'opacity-0'}
           `}>
             {isExpanded && (
@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
           ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}
         `}
         style={{ backgroundColor: settings.themeColor || '#6366f1' }}
-        title="Buka Menu Navigasi"
+        title={settings.language === 'en' ? 'Open Navigation Menu' : 'Buka Menu Navigasi'}
       >
         <i className="lni lni-menu"></i>
       </button>

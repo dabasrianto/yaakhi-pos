@@ -109,7 +109,7 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-dark-bg transition-colors duration-300">
       <FirebaseProvider value={{ db, auth, app }}>
         <AuthProvider>
           <SettingsProvider>

@@ -8,7 +8,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const { user, logout, trialStatus, trialDaysLeft } = useAuth();
-  const { settings } = useSettings();
+  const { settings, isDarkMode, toggleTheme, translations } = useSettings();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -21,18 +21,19 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
 
   const getPageTitle = (pageId: string) => {
     const titles: { [key: string]: string } = {
-      'dashboard-page': 'Dashboard',
-      'pos-page': 'Kasir',
-      'inventory-page': 'Inventori',
-      'customer-page': 'Pelanggan',
-      'reports-page': 'Laporan',
-      'settings-page': 'Pengaturan'
+      'dashboard-page': translations.dashboard,
+      'pos-page': translations.pos,
+      'inventory-page': translations.inventory,
+      'customer-page': translations.customers,
+      'reports-page': translations.reports,
+      'settings-page': translations.settings
     };
-    return titles[pageId] || 'Dashboard';
+    return titles[pageId] || translations.dashboard;
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('id-ID', {
+    const locale = settings.language === 'en' ? 'en-US' : 'id-ID';
+    return date.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -41,7 +42,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('id-ID', {
+    const locale = settings.language === 'en' ? 'en-US' : 'id-ID';
+    return date.toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -53,13 +55,16 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
     if (trialStatus === 'active') {
       return (
         <div className="text-right bg-green-400 text-green-900 px-2 lg:px-3 py-1 rounded-full text-xs font-semibold">
-          Akun Aktif
+          {settings.language === 'en' ? 'Active Account' : 'Akun Aktif'}
         </div>
       );
     } else {
       return (
         <div className="text-right bg-amber-400 text-amber-900 px-2 lg:px-3 py-1 rounded-full text-xs font-semibold">
-          <span className="hidden sm:inline">Sisa Trial: </span>{trialDaysLeft} hari
+          <span className="hidden sm:inline">
+            {settings.language === 'en' ? 'Trial Left: ' : 'Sisa Trial: '}
+          </span>
+          {trialDaysLeft} {settings.language === 'en' ? 'days' : 'hari'}
         </div>
       );
     }
@@ -67,13 +72,24 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
 
   return (
     <header 
-      className="text-white shadow-md p-3 lg:p-4 flex-shrink-0 flex items-center justify-between"
+      className={`text-white shadow-md p-3 lg:p-4 flex-shrink-0 flex items-center justify-between ${
+        isDarkMode ? 'shadow-gray-900/20' : ''
+      }`}
       style={{ backgroundColor: settings.themeColor || '#6366f1' }}
     >
       <div className="flex items-center min-w-0">
         <h1 className="text-lg lg:text-xl font-bold truncate">{getPageTitle(currentPage)}</h1>
       </div>
       <div className="flex items-center gap-2 lg:gap-4">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+          title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-sm`}></i>
+        </button>
+        
         {getTrialStatusDisplay()}
         <div className="text-right hidden sm:block">
           <div className="font-semibold text-sm lg:text-lg">{formatTime(currentTime)}</div>
@@ -87,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
             onClick={logout}
             className="text-xs opacity-80 hover:opacity-100 hover:underline hidden lg:block"
           >
-            <i className="lni lni-exit mr-1"></i>Logout
+            <i className="lni lni-exit mr-1"></i>{translations.logout}
           </button>
         </div>
       </div>

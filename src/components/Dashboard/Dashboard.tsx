@@ -11,7 +11,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
   const { products, sales, customers } = useData();
-  const { settings } = useSettings();
+  const { settings, translations } = useSettings();
   const chartRef = useRef<HTMLCanvasElement>(null);
   const pieChartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
@@ -197,7 +197,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             beginAtZero: true,
             ticks: {
               callback: function(value) {
-                return formatCurrency(Number(value));
+                return formatCurrency(Number(value), settings.currency);
               }
             }
           },
@@ -471,16 +471,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div 
-        className="text-white p-6 rounded-2xl"
+        className="text-white p-6 rounded-2xl dark:shadow-lg"
         style={{ 
           background: `linear-gradient(135deg, ${settings.themeColor || '#6366f1'} 0%, ${settings.themeColor || '#6366f1'}CC 100%)`
         }}
       >
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold mb-2">Selamat Datang di Dashboard</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold mb-2">{translations.welcome}</h1>
             <p className="text-white/80">
-              Pantau performa bisnis Anda hari ini - {new Date().toLocaleDateString('id-ID', { 
+              {settings.language === 'en' ? 'Monitor your business performance today - ' : 'Pantau performa bisnis Anda hari ini - '}
+              {new Date().toLocaleDateString(settings.language === 'en' ? 'en-US' : 'id-ID', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -489,8 +490,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold">{formatCurrency(dailyRevenue)}</div>
-            <div className="text-white/70 text-sm">Revenue Hari Ini</div>
+            <div className="text-3xl font-bold">{formatCurrency(dailyRevenue, settings.currency)}</div>
+            <div className="text-white/70 text-sm">{translations.todayRevenue}</div>
           </div>
         </div>
       </div>
@@ -498,17 +499,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div 
-          className="bg-white p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden"
+          className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden"
           style={{ borderLeftColor: settings.themeColor || '#6366f1' }}
           onClick={() => handleNavigation('reports-page')}
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <p className="text-sm text-gray-600">Revenue Hari Ini</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(dailyRevenue)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{translations.todayRevenue}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(dailyRevenue, settings.currency)}</p>
               <p className={`text-xs flex items-center mt-1 ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 <i className={`lni ${revenueChange >= 0 ? 'lni-arrow-up' : 'lni-arrow-down'} text-xs mr-1`}></i>
-                {revenueChange >= 0 ? '+' : ''}{revenueChange.toFixed(1)}% vs kemarin
+                {revenueChange >= 0 ? '+' : ''}{revenueChange.toFixed(1)}% {settings.language === 'en' ? 'vs yesterday' : 'vs kemarin'}
               </p>
             </div>
             <div 
@@ -530,17 +531,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         </div>
 
         <div 
-          className="bg-white p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden"
+          className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden"
           style={{ borderLeftColor: '#10b981' }}
           onClick={() => handleNavigation('reports-page')}
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <p className="text-sm text-gray-600">Keuntungan Hari Ini</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(dailyProfit)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{translations.todayProfit}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(dailyProfit, settings.currency)}</p>
               <p className={`text-xs flex items-center mt-1 ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 <i className={`lni ${profitChange >= 0 ? 'lni-arrow-up' : 'lni-arrow-down'} text-xs mr-1`}></i>
-                {profitChange >= 0 ? '+' : ''}{profitChange.toFixed(1)}% vs kemarin
+                {profitChange >= 0 ? '+' : ''}{profitChange.toFixed(1)}% {settings.language === 'en' ? 'vs yesterday' : 'vs kemarin'}
               </p>
             </div>
             <div 
@@ -562,17 +563,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         </div>
 
         <div 
-          className="bg-white p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden"
+          className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden"
           style={{ borderLeftColor: '#f59e0b' }}
           onClick={() => handleNavigation('reports-page')}
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <p className="text-sm text-gray-600">Transaksi Hari Ini</p>
-              <p className="text-2xl font-bold text-gray-900">{dailyTransactions}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{translations.todayTransactions}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{dailyTransactions}</p>
               <p className={`text-xs flex items-center mt-1 ${transactionChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 <i className={`lni ${transactionChange >= 0 ? 'lni-arrow-up' : 'lni-arrow-down'} text-xs mr-1`}></i>
-                {transactionChange >= 0 ? '+' : ''}{transactionChange.toFixed(1)}% vs kemarin
+                {transactionChange >= 0 ? '+' : ''}{transactionChange.toFixed(1)}% {settings.language === 'en' ? 'vs yesterday' : 'vs kemarin'}
               </p>
             </div>
             <div 
@@ -594,15 +595,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         </div>
 
         <div 
-          className="bg-white p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-shadow"
           style={{ borderLeftColor: settings.themeColor || '#6366f1' }}
           onClick={() => handleNavigation('inventory-page')}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Nilai Stok</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(inventoryValue)}</p>
-              <p className="text-xs text-gray-500">{products.length} produk</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{translations.stockValue}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(inventoryValue, settings.currency)}</p>
+              <p className="text-xs text-gray-500">{products.length} {settings.language === 'en' ? 'products' : 'produk'}</p>
             </div>
             <div 
               className="p-3 rounded-full"
@@ -620,18 +621,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Trend Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
               <i className="lni lni-stats-up text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-              Trend Penjualan (30 Hari)
+              {settings.language === 'en' ? 'Sales Trend (30 Days)' : 'Trend Penjualan (30 Hari)'}
             </h3>
             <button 
               onClick={() => handleNavigation('reports-page')}
               className="text-sm font-medium flex items-center hover:opacity-80"
               style={{ color: settings.themeColor || '#6366f1' }}
             >
-              Lihat Detail <i className="lni lni-arrow-right text-sm ml-1"></i>
+              {settings.language === 'en' ? 'View Details' : 'Lihat Detail'} <i className="lni lni-arrow-right text-sm ml-1"></i>
             </button>
           </div>
           <div className="h-64">
@@ -640,18 +641,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         </div>
 
         {/* Category Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
               <i className="lni lni-pie-chart text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-              Penjualan per Kategori
+              {settings.language === 'en' ? 'Sales by Category' : 'Penjualan per Kategori'}
             </h3>
             <button 
               onClick={() => handleNavigation('reports-page')}
               className="text-sm font-medium flex items-center hover:opacity-80"
               style={{ color: settings.themeColor || '#6366f1' }}
             >
-              Lihat Detail <i className="lni lni-arrow-right text-sm ml-1"></i>
+              {settings.language === 'en' ? 'View Details' : 'Lihat Detail'} <i className="lni lni-arrow-right text-sm ml-1"></i>
             </button>
           </div>
           <div className="h-64">
@@ -663,14 +664,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
       {/* Quick Actions & Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <i className="lni lni-bolt text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-            Aksi Cepat
+            {settings.language === 'en' ? 'Quick Actions' : 'Aksi Cepat'}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div 
-              className="p-4 border border-gray-200 rounded-lg cursor-pointer transition-colors"
+              className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer transition-colors"
               style={{ 
                 ':hover': { borderColor: settings.themeColor || '#6366f1' }
               }}
@@ -689,8 +690,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                   <i className="lni lni-bar-chart text-lg"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Lihat Semua Laporan</h4>
-                  <p className="text-sm text-gray-500">Analisis lengkap penjualan dan profit</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'View All Reports' : 'Lihat Semua Laporan'}</h4>
+                  <p className="text-sm text-gray-500">{settings.language === 'en' ? 'Complete sales and profit analysis' : 'Analisis lengkap penjualan dan profit'}</p>
                   <p className="text-xs mt-1" style={{ color: settings.themeColor || '#6366f1' }}>{sales.length} transaksi</p>
                 </div>
               </div>
@@ -698,7 +699,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             <div 
-              className="p-4 border border-gray-200 rounded-lg cursor-pointer transition-colors"
+              className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer transition-colors"
               onMouseEnter={(e) => e.currentTarget.style.borderColor = settings.themeColor || '#6366f1'}
               onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
               onClick={() => handleNavigation('inventory-page')}
@@ -714,8 +715,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                   <i className="lni lni-package text-lg"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Kelola Inventori</h4>
-                  <p className="text-sm text-gray-500">Monitor stok dan tambah produk</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'Manage Inventory' : 'Kelola Inventori'}</h4>
+                  <p className="text-sm text-gray-500">{settings.language === 'en' ? 'Monitor stock and add products' : 'Monitor stok dan tambah produk'}</p>
                   <p className="text-xs mt-1" style={{ color: settings.themeColor || '#6366f1' }}>{products.length} produk</p>
                 </div>
               </div>
@@ -723,7 +724,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             <div 
-              className="p-4 border border-gray-200 rounded-lg cursor-pointer transition-colors"
+              className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer transition-colors"
               onMouseEnter={(e) => e.currentTarget.style.borderColor = settings.themeColor || '#6366f1'}
               onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
               onClick={() => handleNavigation('customer-page')}
@@ -739,8 +740,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                   <i className="lni lni-users text-lg"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Database Pelanggan</h4>
-                  <p className="text-sm text-gray-500">Lihat riwayat dan data pelanggan</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'Customer Database' : 'Database Pelanggan'}</h4>
+                  <p className="text-sm text-gray-500">{settings.language === 'en' ? 'View history and customer data' : 'Lihat riwayat dan data pelanggan'}</p>
                   <p className="text-xs mt-1" style={{ color: settings.themeColor || '#6366f1' }}>{customers.length} pelanggan</p>
                 </div>
               </div>
@@ -748,7 +749,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             <div 
-              className="p-4 border border-gray-200 rounded-lg cursor-pointer transition-colors"
+              className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer transition-colors"
               onMouseEnter={(e) => e.currentTarget.style.borderColor = settings.themeColor || '#6366f1'}
               onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
               onClick={() => handleNavigation('pos-page')}
@@ -764,9 +765,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                   <i className="lni lni-cart text-lg"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Mulai Transaksi</h4>
-                  <p className="text-sm text-gray-500">Buka kasir untuk melayani pelanggan</p>
-                  <p className="text-xs mt-1" style={{ color: settings.themeColor || '#6366f1' }}>Kasir siap</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'Start Transaction' : 'Mulai Transaksi'}</h4>
+                  <p className="text-sm text-gray-500">{settings.language === 'en' ? 'Open cashier to serve customers' : 'Buka kasir untuk melayani pelanggan'}</p>
+                  <p className="text-xs mt-1" style={{ color: settings.themeColor || '#6366f1' }}>{settings.language === 'en' ? 'Cashier ready' : 'Kasir siap'}</p>
                 </div>
               </div>
               <i className="lni lni-arrow-right text-gray-400 ml-auto"></i>
@@ -775,41 +776,41 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         </div>
 
         {/* Top Products */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
               <i className="lni lni-crown text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-              Top Produk Bulan Ini
+              {settings.language === 'en' ? 'Top Products This Month' : 'Top Produk Bulan Ini'}
             </h3>
             <button 
               onClick={() => handleNavigation('inventory-page')}
               className="text-sm font-medium flex items-center hover:opacity-80"
               style={{ color: settings.themeColor || '#6366f1' }}
             >
-              Lihat Semua <i className="lni lni-arrow-right text-sm ml-1"></i>
+              {settings.language === 'en' ? 'View All' : 'Lihat Semua'} <i className="lni lni-arrow-right text-sm ml-1"></i>
             </button>
           </div>
           <div className="space-y-3">
             {topProducts.length > 0 ? (
               topProducts.map((product, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center">
                     <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
                       {index + 1}
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">{product.name}</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-white">{product.name}</h4>
                       <p className="text-sm text-gray-500">{product.category}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold" style={{ color: settings.themeColor || '#6366f1' }}>{formatCurrency(product.total)}</p>
-                    <p className="text-xs text-gray-500">{product.quantity} terjual</p>
+                    <p className="font-bold" style={{ color: settings.themeColor || '#6366f1' }}>{formatCurrency(product.total, settings.currency)}</p>
+                    <p className="text-xs text-gray-500">{product.quantity} {settings.language === 'en' ? 'sold' : 'terjual'}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-center py-4">Belum ada data penjualan produk</p>
+              <p className="text-gray-500 text-center py-4">{settings.language === 'en' ? 'No product sales data yet' : 'Belum ada data penjualan produk'}</p>
             )}
           </div>
         </div>
@@ -818,14 +819,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
       {/* Status & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Business Status */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <i className="lni lni-stats-up text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-            Status Bisnis
+            {settings.language === 'en' ? 'Business Status' : 'Status Bisnis'}
           </h3>
           <div className="space-y-4">
             <div 
-              className="flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors"
+              className="flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors dark:hover:bg-gray-700"
               style={{ backgroundColor: `${settings.themeColor || '#6366f1'}10` }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${settings.themeColor || '#6366f1'}20`}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${settings.themeColor || '#6366f1'}10`}
@@ -842,20 +843,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                   <i className="lni lni-package text-lg"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Inventori</h4>
-                  <p className="text-sm text-gray-500">{products.length} produk total</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{translations.inventory}</h4>
+                  <p className="text-sm text-gray-500">{products.length} {settings.language === 'en' ? 'total products' : 'produk total'}</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                  ✓ Stok aman
+                  ✓ {settings.language === 'en' ? 'Stock safe' : 'Stok aman'}
                 </span>
                 <i className="lni lni-arrow-right text-gray-400 ml-2"></i>
               </div>
             </div>
 
             <div 
-              className="flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors"
+              className="flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors dark:hover:bg-gray-700"
               style={{ backgroundColor: `${settings.themeColor || '#6366f1'}10` }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${settings.themeColor || '#6366f1'}20`}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${settings.themeColor || '#6366f1'}10`}
@@ -872,21 +873,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                   <i className="lni lni-users text-lg"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Pelanggan</h4>
-                  <p className="text-sm text-gray-500">{customers.length} aktif dari {customers.length} total</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{translations.customers}</h4>
+                  <p className="text-sm text-gray-500">{customers.length} {settings.language === 'en' ? `active of ${customers.length} total` : `aktif dari ${customers.length} total`}</p>
                 </div>
               </div>
               <i className="lni lni-arrow-right text-gray-400"></i>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
               <div className="flex items-center">
-                <div className="p-2 bg-orange-100 rounded-lg mr-3">
+                <div className="p-2 bg-orange-100 dark:bg-orange-800 rounded-lg mr-3">
                   <i className="lni lni-reload text-lg text-orange-600"></i>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Return</h4>
-                  <p className="text-sm text-gray-500">0 return - Rp 0</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'Returns' : 'Return'}</h4>
+                  <p className="text-sm text-gray-500">0 {settings.language === 'en' ? 'returns' : 'return'} - {formatCurrency(0, settings.currency)}</p>
                 </div>
               </div>
               <i className="lni lni-arrow-right text-gray-400"></i>
@@ -895,18 +896,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
               <i className="lni lni-pulse text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-              Aktivitas Terkini
+              {settings.language === 'en' ? 'Recent Activity' : 'Aktivitas Terkini'}
             </h3>
             <button 
               onClick={() => handleNavigation('reports-page')}
               className="text-sm font-medium flex items-center hover:opacity-80"
               style={{ color: settings.themeColor || '#6366f1' }}
             >
-              Lihat Semua Aktivitas <i className="lni lni-arrow-right text-sm ml-1"></i>
+              {settings.language === 'en' ? 'View All Activities' : 'Lihat Semua Aktivitas'} <i className="lni lni-arrow-right text-sm ml-1"></i>
             </button>
           </div>
           <div className="space-y-3">
@@ -914,7 +915,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
               recentActivity.map((sale, index) => (
                 <div 
                   key={sale.id} 
-                  className="flex items-center p-3 rounded-lg"
+                  className="flex items-center p-3 rounded-lg dark:bg-gray-700"
                   style={{ backgroundColor: `${settings.themeColor || '#6366f1'}10` }}
                 >
                   <div 
@@ -927,38 +928,38 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     <i className="lni lni-cart text-sm"></i>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">
-                      Penjualan #{sale.id.substring(0, 8)}
+                    <h4 className="font-medium text-gray-900 dark:text-white">
+                      {settings.language === 'en' ? 'Sale' : 'Penjualan'} #{sale.id.substring(0, 8)}
                     </h4>
                     <p className="text-sm text-gray-500">
-                      {formatCurrency(sale.finalTotal)} - {sale.customer ? sale.customer.name : 'Tamu'}
+                      {formatCurrency(sale.finalTotal, settings.currency)} - {sale.customer ? sale.customer.name : (settings.language === 'en' ? 'Guest' : 'Tamu')}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(sale.date).toLocaleString('id-ID')}
+                      {new Date(sale.date).toLocaleString(settings.language === 'en' ? 'en-US' : 'id-ID')}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-center py-4">Belum ada aktivitas terbaru</p>
+              <p className="text-gray-500 text-center py-4">{settings.language === 'en' ? 'No recent activities' : 'Belum ada aktivitas terbaru'}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Weekly Performance Summary */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      <div className="bg-white dark:bg-dark-surface p-6 rounded-xl shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <i className="lni lni-bar-chart text-xl mr-2" style={{ color: settings.themeColor || '#6366f1' }}></i>
-            Ringkasan Performa Minggu Ini
+            {settings.language === 'en' ? 'This Week\'s Performance Summary' : 'Ringkasan Performa Minggu Ini'}
           </h3>
           <button 
             onClick={() => handleNavigation('reports-page')}
             className="text-sm font-medium flex items-center hover:opacity-80"
             style={{ color: settings.themeColor || '#6366f1' }}
           >
-            Lihat Laporan Lengkap <i className="lni lni-arrow-right text-sm ml-1"></i>
+            {settings.language === 'en' ? 'View Full Report' : 'Lihat Laporan Lengkap'} <i className="lni lni-arrow-right text-sm ml-1"></i>
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -975,8 +976,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             >
               <i className="lni lni-dollar text-lg"></i>
             </div>
-            <h4 className="font-medium text-gray-900">Revenue Minggu Ini</h4>
-            <p className="text-2xl font-bold" style={{ color: settings.themeColor || '#6366f1' }}>{formatCurrency(monthlyRevenue)}</p>
+            <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'This Week\'s Revenue' : 'Revenue Minggu Ini'}</h4>
+            <p className="text-2xl font-bold" style={{ color: settings.themeColor || '#6366f1' }}>{formatCurrency(monthlyRevenue, settings.currency)}</p>
           </div>
           
           <div 
@@ -992,7 +993,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             >
               <i className="lni lni-cart text-lg"></i>
             </div>
-            <h4 className="font-medium text-gray-900">Transaksi Minggu Ini</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'This Week\'s Transactions' : 'Transaksi Minggu Ini'}</h4>
             <p className="text-2xl font-bold" style={{ color: settings.themeColor || '#6366f1' }}>{monthlyTransactions}</p>
           </div>
           
@@ -1009,7 +1010,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             >
               <i className="lni lni-users text-lg"></i>
             </div>
-            <h4 className="font-medium text-gray-900">Pelanggan Baru</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'New Customers' : 'Pelanggan Baru'}</h4>
             <p className="text-2xl font-bold" style={{ color: settings.themeColor || '#6366f1' }}>0</p>
           </div>
           
@@ -1026,7 +1027,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             >
               <i className="lni lni-package text-lg"></i>
             </div>
-            <h4 className="font-medium text-gray-900">Produk Terjual</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">{settings.language === 'en' ? 'Products Sold' : 'Produk Terjual'}</h4>
             <p className="text-2xl font-bold" style={{ color: settings.themeColor || '#6366f1' }}>
               {sales.reduce((total, sale) => total + sale.items.reduce((sum: number, item: any) => sum + item.quantity, 0), 0)}
             </p>

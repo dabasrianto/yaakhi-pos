@@ -581,6 +581,10 @@ const SettingsPage: React.FC = () => {
                         <option value="58mm">58mm</option>
                         <option value="80mm">80mm</option>
                         <option value="A4">A4</option>
+                        <option value="GBP">British Pound (GBP)</option>
+                        <option value="JPY">Japanese Yen (JPY)</option>
+                        <option value="SGD">Singapore Dollar (SGD)</option>
+                        <option value="MYR">Malaysian Ringgit (MYR)</option>
                       </select>
                     </div>
                     
