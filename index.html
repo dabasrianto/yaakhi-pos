@@ -28,7 +28,7 @@
     <meta name="apple-mobile-web-app-title" content="POS Keren" />
     
     <!-- Prevent zoom on mobile -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -56,17 +56,22 @@
       // PWA Install Prompt
       let deferredPrompt;
       window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('beforeinstallprompt event fired');
         e.preventDefault();
         deferredPrompt = e;
-        
-        // Store the event for later use by the install button
-        console.log('PWA install prompt available');
+        // Dispatch custom event to notify components
+        window.dispatchEvent(new CustomEvent('pwa-installable', { detail: e }));
       });
       
       // Track app install
       window.addEventListener('appinstalled', (evt) => {
         console.log('App was installed');
+        deferredPrompt = null;
+        window.dispatchEvent(new CustomEvent('pwa-installed'));
       });
+      
+      // Make deferredPrompt available globally
+      window.deferredPrompt = deferredPrompt;
     </script>
   </body>
 </html>

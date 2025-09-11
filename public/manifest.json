@@ -2,32 +2,50 @@
   "name": "POS & Inventory Management System",
   "short_name": "POS Keren",
   "description": "Sistem Point of Sale dan Manajemen Inventori yang canggih untuk bisnis Anda",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6366f1",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "scope": "/",
   "lang": "id",
   "categories": ["business", "productivity", "finance"],
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
+      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
       "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3795/3795042.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3795/3795042.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
