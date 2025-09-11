@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import LoginPage from './LoginPage';
+import MolecularBackground from './MolecularBackground';
 
 const LandingPage: React.FC = () => {
   const [showLogin, setShowLogin] = React.useState(false);
@@ -12,6 +13,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 p-6 sm:p-8">
+      <MolecularBackground />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="flex justify-between items-center py-4">

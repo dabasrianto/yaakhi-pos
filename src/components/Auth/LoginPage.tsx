@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from 'firebase/auth';
 import { useFirebase } from '../../context/FirebaseContext';
+import MolecularBackground from './MolecularBackground';
 
 interface LoginPageProps {
   onBack?: () => void;
@@ -99,6 +100,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
 
   return (
     <div className="w-full h-screen flex justify-center items-center bg-slate-100 p-4">
+      <MolecularBackground />
       <div className="w-full max-w-sm bg-white p-8 rounded-xl shadow-lg">
         {onBack && (
           <button
