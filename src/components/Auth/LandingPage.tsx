@@ -1,12 +1,8 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 import LoginPage from './LoginPage';
-import MolecularBackground from './MolecularBackground';
 
-interface LandingPageProps {
-  onShowLogin: () => void;
-}
-
-const LandingPage: React.FC<LandingPageProps> = ({ onShowLogin }) => {
+const LandingPage: React.FC = () => {
   const [showLogin, setShowLogin] = React.useState(false);
 
   if (showLogin) {
@@ -16,7 +12,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowLogin }) => {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 p-6 sm:p-8">
-      <MolecularBackground />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="flex justify-between items-center py-4">
@@ -45,7 +40,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowLogin }) => {
               Kelola inventori, lacak penjualan, dan layani pelanggan lebih cepat dengan aplikasi Point of Sale (POS) yang terintegrasi penuh.
             </p>
             <button 
-              onClick={onShowLogin}
+              onClick={() => setShowLogin(true)}
               className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-transform transform hover:scale-105"
             >
               Coba Gratis 7 Hari <i className="fas fa-arrow-right ml-2"></i>

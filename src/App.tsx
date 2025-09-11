@@ -38,7 +38,6 @@ const auth = getAuth(app);
 const AppContent: React.FC = () => {
   const { user, loading, trialStatus } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard-page');
-  const [showLogin, setShowLogin] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   useEffect(() => {
@@ -54,14 +53,9 @@ const AppContent: React.FC = () => {
     return <AppLoader />;
   }
 
-  // Show login page if requested
-  if (showLogin && !user) {
-    return <LoginPage onBack={() => setShowLogin(false)} />;
-  }
-
   // Show landing page if no user
   if (!user) {
-    return <LandingPage onShowLogin={() => setShowLogin(true)} />;
+    return <LandingPage />;
   }
 
   // Show subscription modal if trial expired
