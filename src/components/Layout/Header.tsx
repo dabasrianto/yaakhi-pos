@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
-import PWAInstallButton from '../PWA/PWAInstallButton';
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 interface HeaderProps {
   currentPage: string;
@@ -11,6 +19,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const { user, logout, trialStatus, trialDaysLeft } = useAuth();
   const { settings, isDarkMode, toggleTheme } = useSettings();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,6 +31,82 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    // Check if app is already installed
+    const checkIfInstalled = () => {
+      if (window.matchMedia('(display-mode: standalone)').matches || 
+          (window.navigator as any).standalone === true) {
+        setIsInstalled(true);
+      }
+    };
+
+    checkIfInstalled();
+
+    // Listen for beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setIsInstallable(true);
+    };
+
+    // Listen for app installed event
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+      setIsInstalling(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleDirectInstall = async () => {
+    if (!deferredPrompt) {
+      // Fallback: Show manual install instructions
+      const userAgent = navigator.userAgent.toLowerCase();
+      let instructions = '';
+      
+      if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+        instructions = '📱 iOS: Tap Share button → Add to Home Screen';
+      } else if (userAgent.includes('android')) {
+        instructions = '📱 Android: Tap menu (⋮) → Add to Home Screen atau Install App';
+      } else {
+        instructions = '💻 Desktop: Look for install icon in address bar atau bookmark this page';
+      }
+      
+      alert(`Install POS Keren:\n\n${instructions}\n\nSetelah diinstall, aplikasi akan berjalan seperti native app!`);
+      return;
+    }
+
+    setIsInstalling(true);
+    
+    try {
+      await deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+        // App will be installed, handleAppInstalled will be called
+      } else {
+        console.log('User dismissed the install prompt');
+        setIsInstalling(false);
+      }
+      
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+    } catch (error) {
+      console.error('Error during installation:', error);
+      setIsInstalling(false);
+      alert('Terjadi kesalahan saat menginstall aplikasi. Silakan coba lagi.');
+    }
+  };
 
   const getPageTitle = (pageId: string) => {
     const titles: { [key: string]: string } = {
@@ -90,29 +178,33 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
         </button>
         
         {/* Download App Button */}
-        <button
-          onClick={() => {
-            // Trigger install prompt if available
-            const installEvent = (window as any).deferredPrompt;
-            if (installEvent) {
-              installEvent.prompt();
-              installEvent.userChoice.then((choiceResult: any) => {
-                if (choiceResult.outcome === 'accepted') {
-                  console.log('User accepted the install prompt');
-                }
-                (window as any).deferredPrompt = null;
-              });
-            } else {
-              // Show manual install instructions
-              alert('Untuk menginstall aplikasi:\n\n📱 Android/Desktop: Klik ikon install di address bar browser\n🍎 iOS: Safari → Share → Add to Home Screen');
-            }
-          }}
-          className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
-          title="Download & Install App"
-        >
-          <i className="fas fa-download text-sm"></i>
-          <span className="hidden lg:inline">Download App</span>
-        </button>
+        {!isInstalled && (
+          <button
+            onClick={handleDirectInstall}
+            disabled={isInstalling}
+            className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm bg-white/10 hover:bg-white/20 disabled:bg-white/5 text-white rounded-lg transition-colors"
+            title={isInstalling ? "Installing..." : "Install POS Keren App"}
+          >
+            {isInstalling ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span className="hidden lg:inline">Installing...</span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-download text-sm"></i>
+                <span className="hidden lg:inline">Install App</span>
+              </>
+            )}
+          </button>
+        )}
+        
+        {isInstalled && (
+          <div className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm bg-green-500/20 text-white rounded-lg">
+            <i className="fas fa-check text-sm"></i>
+            <span className="hidden lg:inline">App Installed</span>
+          </div>
+        )}
         
         {getTrialStatusDisplay()}
         <div className="text-right hidden sm:block">

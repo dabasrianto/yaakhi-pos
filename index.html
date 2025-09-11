@@ -59,35 +59,8 @@
         e.preventDefault();
         deferredPrompt = e;
         
-        // Show install button or banner
-        const installBanner = document.createElement('div');
-        installBanner.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; right: 0; background: #6366f1; color: white; padding: 12px; text-align: center; z-index: 9999; font-family: system-ui;">
-            <span>📱 Install POS Keren untuk pengalaman yang lebih baik!</span>
-            <button id="install-btn" style="margin-left: 10px; background: white; color: #6366f1; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-              Install
-            </button>
-            <button id="dismiss-btn" style="margin-left: 8px; background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-              Nanti
-            </button>
-          </div>
-        `;
-        document.body.appendChild(installBanner);
-        
-        document.getElementById('install-btn').addEventListener('click', () => {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              console.log('User accepted the install prompt');
-            }
-            deferredPrompt = null;
-            document.body.removeChild(installBanner);
-          });
-        });
-        
-        document.getElementById('dismiss-btn').addEventListener('click', () => {
-          document.body.removeChild(installBanner);
-        });
+        // Store the event for later use by the install button
+        console.log('PWA install prompt available');
       });
       
       // Track app install
