@@ -1,9 +1,12 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
 import LoginPage from './LoginPage';
 import MolecularBackground from './MolecularBackground';
 
-const LandingPage: React.FC = () => {
+interface LandingPageProps {
+  onShowLogin: () => void;
+}
+
+const LandingPage: React.FC<LandingPageProps> = ({ onShowLogin }) => {
   const [showLogin, setShowLogin] = React.useState(false);
 
   if (showLogin) {
