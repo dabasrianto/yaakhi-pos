@@ -17,6 +17,7 @@ const STATIC_FILES = [
 // Install event - cache static files
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
+  self.skipWaiting(); // Force activation
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -25,7 +26,6 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('Service Worker: Static files cached');
-        return self.skipWaiting();
       })
       .catch((error) => {
         console.error('Service Worker: Error caching static files', error);
