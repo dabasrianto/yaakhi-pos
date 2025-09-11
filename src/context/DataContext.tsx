@@ -121,10 +121,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
 
     const sampleProducts = [
-      { name: 'Kopi Hitam', brand: 'Kapal Api', category: 'Minuman', costPrice: 3000, price: 5000, stock: 100, icon: 'fas fa-coffee', iconColor: '#6f4e37' },
-      { name: 'Kopi Susu', brand: 'Indocafe', category: 'Minuman', costPrice: 4500, price: 7000, stock: 80, icon: 'fas fa-mug-saucer', iconColor: '#c4a689' },
-      { name: 'Roti Bakar', brand: 'Sari Roti', category: 'Makanan', costPrice: 8000, price: 12000, stock: 50, icon: 'fas fa-bread-slice', iconColor: '#d4a373' },
-      { name: 'Pisang Goreng', brand: '', category: 'Camilan', costPrice: 1000, price: 2000, stock: 40, icon: 'fas fa-leaf', iconColor: '#a7c957' },
+      { name: 'Kopi Hitam', brand: 'Kapal Api', category: 'Minuman', costPrice: 3000, price: 5000, stock: 100, icon: 'lni lni-coffee-cup', iconColor: '#6f4e37' },
+      { name: 'Kopi Susu', brand: 'Indocafe', category: 'Minuman', costPrice: 4500, price: 7000, stock: 80, icon: 'fas fa-coffee', iconColor: '#c4a689' },
+      { name: 'Roti Bakar', brand: 'Sari Roti', category: 'Makanan', costPrice: 8000, price: 12000, stock: 50, icon: 'lni lni-dinner', iconColor: '#d4a373' },
+      { name: 'Pisang Goreng', brand: '', category: 'Camilan', costPrice: 1000, price: 2000, stock: 40, icon: 'lni lni-cake', iconColor: '#a7c957' },
     ];
 
     const sampleCustomers = [
