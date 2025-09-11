@@ -89,10 +89,32 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
           <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-sm`}></i>
         </button>
         
+        {/* Download App Button */}
+        <button
+          onClick={() => {
+            // Trigger install prompt if available
+            const installEvent = (window as any).deferredPrompt;
+            if (installEvent) {
+              installEvent.prompt();
+              installEvent.userChoice.then((choiceResult: any) => {
+                if (choiceResult.outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+                }
+                (window as any).deferredPrompt = null;
+              });
+            } else {
+              // Show manual install instructions
+              alert('Untuk menginstall aplikasi:\n\n📱 Android/Desktop: Klik ikon install di address bar browser\n🍎 iOS: Safari → Share → Add to Home Screen');
+            }
+          }}
+          className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+          title="Download & Install App"
+        >
+          <i className="fas fa-download text-sm"></i>
+          <span className="hidden lg:inline">Download App</span>
+        </button>
+        
         {getTrialStatusDisplay()}
-          {/* PWA Install Button */}
-          <PWAInstallButton />
-          
         <div className="text-right hidden sm:block">
           <div className="font-semibold text-sm lg:text-lg">{formatTime(currentTime)}</div>
           <div className="text-xs opacity-80 hidden lg:block">{formatDate(currentTime)}</div>
