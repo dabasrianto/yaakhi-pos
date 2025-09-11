@@ -89,6 +89,12 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
           >
             <i className="lni lni-exit mr-1"></i>Logout
           </button>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="text-xs opacity-80 hover:opacity-100 hover:underline block lg:hidden"
+          >
+            <i className="lni lni-enter mr-1"></i>Login
+          </button>
         </div>
       </div>
     </header>

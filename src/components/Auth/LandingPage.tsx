@@ -42,7 +42,7 @@ const LandingPage: React.FC = () => {
               Kelola inventori, lacak penjualan, dan layani pelanggan lebih cepat dengan aplikasi Point of Sale (POS) yang terintegrasi penuh.
             </p>
             <button 
-              onClick={() => setShowLogin(true)}
+              onClick={onShowLogin}
               className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-transform transform hover:scale-105"
             >
               Coba Gratis 7 Hari <i className="fas fa-arrow-right ml-2"></i>

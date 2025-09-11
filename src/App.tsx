@@ -53,9 +53,14 @@ const AppContent: React.FC = () => {
     return <AppLoader />;
   }
 
+  // Show login page if requested
+  if (showLogin && !user) {
+    return <LoginPage onBack={() => setShowLogin(false)} />;
+  }
+
   // Show landing page if no user
   if (!user) {
-    return <LandingPage />;
+    return <LandingPage onShowLogin={() => setShowLogin(true)} />;
   }
 
   // Show subscription modal if trial expired
