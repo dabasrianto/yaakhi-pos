@@ -8,7 +8,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { settings, isDarkMode, translations } = useSettings();
+  const { settings, isDarkMode } = useSettings();
   
   // Close sidebar when clicking on navigation item on mobile
   const handleNavClick = (pageId: string) => {
@@ -22,38 +22,38 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
     { 
       id: 'dashboard-page', 
       icon: 'lni lni-dashboard', 
-      label: translations.dashboard,
-      tooltip: settings.language === 'en' ? 'View business summary and today\'s statistics' : 'Lihat ringkasan bisnis dan statistik hari ini'
+      label: 'Dashboard',
+      tooltip: 'Lihat ringkasan bisnis dan statistik hari ini'
     },
     { 
       id: 'pos-page', 
       icon: 'lni lni-calculator', 
-      label: translations.pos,
-      tooltip: settings.language === 'en' ? 'Point of Sale system for sales transactions' : 'Sistem Point of Sale untuk transaksi penjualan'
+      label: 'Kasir',
+      tooltip: 'Sistem Point of Sale untuk transaksi penjualan'
     },
     { 
       id: 'inventory-page', 
       icon: 'lni lni-package', 
-      label: translations.inventory,
-      tooltip: settings.language === 'en' ? 'Manage product stock and inventory reports' : 'Kelola stok produk dan laporan inventori'
+      label: 'Inventori',
+      tooltip: 'Kelola stok produk dan laporan inventori'
     },
     { 
       id: 'customer-page', 
       icon: 'lni lni-users', 
-      label: translations.customers,
-      tooltip: settings.language === 'en' ? 'Customer data management and transaction history' : 'Manajemen data pelanggan dan riwayat transaksi'
+      label: 'Pelanggan',
+      tooltip: 'Manajemen data pelanggan dan riwayat transaksi'
     },
     { 
       id: 'reports-page', 
       icon: 'lni lni-bar-chart', 
-      label: translations.reports,
-      tooltip: settings.language === 'en' ? 'Sales analysis and financial reports' : 'Analisis penjualan dan laporan keuangan'
+      label: 'Laporan',
+      tooltip: 'Analisis penjualan dan laporan keuangan'
     },
     { 
       id: 'settings-page', 
       icon: 'lni lni-cog', 
-      label: translations.settings,
-      tooltip: settings.language === 'en' ? 'Application configuration and system settings' : 'Konfigurasi aplikasi dan pengaturan sistem'
+      label: 'Pengaturan',
+      tooltip: 'Konfigurasi aplikasi dan pengaturan sistem'
     }
   ];
 
@@ -97,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-slate-100'} transition-colors`}
-            title={isExpanded ? (settings.language === 'en' ? 'Close Menu' : 'Tutup Menu') : (settings.language === 'en' ? 'Open Menu' : 'Buka Menu')}
+            title={isExpanded ? 'Tutup Menu' : 'Buka Menu'}
           >
             <i className={`lni ${isExpanded ? 'lni-chevron-left' : 'lni-menu'} ${isDarkMode ? 'text-gray-300' : 'text-slate-600'}`}></i>
           </button>
@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
           ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}
         `}
         style={{ backgroundColor: settings.themeColor || '#6366f1' }}
-        title={settings.language === 'en' ? 'Open Navigation Menu' : 'Buka Menu Navigasi'}
+        title="Buka Menu Navigasi"
       >
         <i className="lni lni-menu"></i>
       </button>

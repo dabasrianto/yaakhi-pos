@@ -1,45 +1,18 @@
-export const formatCurrency = (amount: number | string, currency: string = 'IDR'): string => {
+export const formatCurrency = (amount: number | string): string => {
   const numAmount = Number(amount);
   
   // Handle invalid numbers
   if (isNaN(numAmount) || !isFinite(numAmount)) {
-    return getCurrencySymbol(currency) + ' 0';
+    return 'Rp 0';
   }
   
-  const locale = getLocaleFromCurrency(currency);
-  
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat('id-ID', {
     style: 'currency',
-    currency: currency,
+    currency: 'IDR',
     minimumFractionDigits: 0
   }).format(numAmount);
 };
 
-export const getCurrencySymbol = (currency: string): string => {
-  const symbols: { [key: string]: string } = {
-    'IDR': 'Rp',
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'JPY': '¥',
-    'SGD': 'S$',
-    'MYR': 'RM'
-  };
-  return symbols[currency] || currency;
-};
-
-export const getLocaleFromCurrency = (currency: string): string => {
-  const locales: { [key: string]: string } = {
-    'IDR': 'id-ID',
-    'USD': 'en-US',
-    'EUR': 'de-DE',
-    'GBP': 'en-GB',
-    'JPY': 'ja-JP',
-    'SGD': 'en-SG',
-    'MYR': 'ms-MY'
-  };
-  return locales[currency] || 'en-US';
-};
 export const hexToRgba = (hex: string, alpha: number = 0.1): string => {
   if (!/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
     return `rgba(100, 116, 139, ${alpha})`;

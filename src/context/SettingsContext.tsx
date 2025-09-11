@@ -8,11 +8,9 @@ interface StoreSettings {
   storeAddress: string;
   storePhone: string;
   storeEmail: string;
-  logoUrl: string;
   currency: string;
   taxRate: number;
   receiptFooter: string;
-  theme: string;
   language: string;
   autoBackup: boolean;
   lowStockAlert: number;
@@ -28,8 +26,6 @@ interface SettingsContextType {
   settings: StoreSettings;
   loading: boolean;
   isDarkMode: boolean;
-  toggleTheme: () => void;
-  currentLanguage: string;
   translations: any;
 }
 
@@ -38,11 +34,9 @@ const defaultSettings: StoreSettings = {
   storeAddress: '',
   storePhone: '',
   storeEmail: '',
-  logoUrl: '',
   currency: 'IDR',
   taxRate: 11,
   receiptFooter: 'Terima kasih atas kunjungan Anda!',
-  theme: 'light',
   language: 'id',
   autoBackup: true,
   lowStockAlert: 5,
@@ -53,77 +47,6 @@ const defaultSettings: StoreSettings = {
     autoPrint: false
   }
 };
-
-// Translations
-const translations = {
-  id: {
-    dashboard: 'Dashboard',
-    pos: 'Kasir',
-    inventory: 'Inventori',
-    customers: 'Pelanggan',
-    reports: 'Laporan',
-    settings: 'Pengaturan',
-    welcome: 'Selamat Datang di Dashboard',
-    todayRevenue: 'Revenue Hari Ini',
-    todayProfit: 'Keuntungan Hari Ini',
-    todayTransactions: 'Transaksi Hari Ini',
-    stockValue: 'Nilai Stok',
-    addProduct: 'Tambah Produk',
-    addCustomer: 'Tambah Pelanggan',
-    cart: 'Keranjang',
-    checkout: 'Bayar',
-    total: 'Total',
-    subtotal: 'Subtotal',
-    discount: 'Diskon',
-    tax: 'Pajak',
-    cash: 'Tunai',
-    bankTransfer: 'Transfer Bank',
-    eWallet: 'E-Wallet',
-    balance: 'Saldo',
-    save: 'Simpan',
-    cancel: 'Batal',
-    delete: 'Hapus',
-    edit: 'Edit',
-    search: 'Cari',
-    filter: 'Filter',
-    export: 'Ekspor',
-    print: 'Print',
-    logout: 'Logout'
-  },
-  en: {
-    dashboard: 'Dashboard',
-    pos: 'POS',
-    inventory: 'Inventory',
-    customers: 'Customers',
-    reports: 'Reports',
-    settings: 'Settings',
-    welcome: 'Welcome to Dashboard',
-    todayRevenue: 'Today\'s Revenue',
-    todayProfit: 'Today\'s Profit',
-    todayTransactions: 'Today\'s Transactions',
-    stockValue: 'Stock Value',
-    addProduct: 'Add Product',
-    addCustomer: 'Add Customer',
-    cart: 'Cart',
-    checkout: 'Checkout',
-    total: 'Total',
-    subtotal: 'Subtotal',
-    discount: 'Discount',
-    tax: 'Tax',
-    cash: 'Cash',
-    bankTransfer: 'Bank Transfer',
-    eWallet: 'E-Wallet',
-    balance: 'Balance',
-    save: 'Save',
-    cancel: 'Cancel',
-    delete: 'Delete',
-    edit: 'Edit',
-    search: 'Search',
-    filter: 'Filter',
-    export: 'Export',
-    print: 'Print',
-    logout: 'Logout'
-  }
 };
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 

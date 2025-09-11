@@ -8,7 +8,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const { user, logout, trialStatus, trialDaysLeft } = useAuth();
-  const { settings, isDarkMode, toggleTheme, translations } = useSettings();
+  const { settings, isDarkMode, toggleTheme } = useSettings();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -21,19 +21,18 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
 
   const getPageTitle = (pageId: string) => {
     const titles: { [key: string]: string } = {
-      'dashboard-page': translations.dashboard,
-      'pos-page': translations.pos,
-      'inventory-page': translations.inventory,
-      'customer-page': translations.customers,
-      'reports-page': translations.reports,
-      'settings-page': translations.settings
+      'dashboard-page': 'Dashboard',
+      'pos-page': 'Kasir',
+      'inventory-page': 'Inventori',
+      'customer-page': 'Pelanggan',
+      'reports-page': 'Laporan',
+      'settings-page': 'Pengaturan'
     };
-    return titles[pageId] || translations.dashboard;
+    return titles[pageId] || 'Dashboard';
   };
 
   const formatTime = (date: Date) => {
-    const locale = settings.language === 'en' ? 'en-US' : 'id-ID';
-    return date.toLocaleTimeString(locale, {
+    return date.toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -42,8 +41,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   };
 
   const formatDate = (date: Date) => {
-    const locale = settings.language === 'en' ? 'en-US' : 'id-ID';
-    return date.toLocaleDateString(locale, {
+    return date.toLocaleDateString('id-ID', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -55,16 +53,16 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
     if (trialStatus === 'active') {
       return (
         <div className="text-right bg-green-400 text-green-900 px-2 lg:px-3 py-1 rounded-full text-xs font-semibold">
-          {settings.language === 'en' ? 'Active Account' : 'Akun Aktif'}
+          Akun Aktif
         </div>
       );
     } else {
       return (
         <div className="text-right bg-amber-400 text-amber-900 px-2 lg:px-3 py-1 rounded-full text-xs font-semibold">
           <span className="hidden sm:inline">
-            {settings.language === 'en' ? 'Trial Left: ' : 'Sisa Trial: '}
+            Sisa Trial: 
           </span>
-          {trialDaysLeft} {settings.language === 'en' ? 'days' : 'hari'}
+          {trialDaysLeft} hari
         </div>
       );
     }
@@ -103,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
             onClick={logout}
             className="text-xs opacity-80 hover:opacity-100 hover:underline hidden lg:block"
           >
-            <i className="lni lni-exit mr-1"></i>{translations.logout}
+            <i className="lni lni-exit mr-1"></i>Logout
           </button>
         </div>
       </div>
