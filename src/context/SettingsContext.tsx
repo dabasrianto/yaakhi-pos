@@ -201,7 +201,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
   const value = {
     settings,
-    loading
+    loading,
     isDarkMode,
     toggleTheme,
     currentLanguage: settings.language,
