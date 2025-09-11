@@ -2,8 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- PWA Meta Tags -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/3795/3795042.png" />
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/192/3795/3795042.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="msapplication-TileColor" content="#6366f1" />
+    <meta name="msapplication-TileImage" content="https://cdn-icons-png.flaticon.com/192/3795/3795042.png" />
+    
+    <!-- App Description -->
+    <meta name="description" content="Sistem Point of Sale dan Manajemen Inventori yang canggih untuk bisnis Anda" />
+    <meta name="keywords" content="POS, Point of Sale, Inventori, Kasir, Bisnis, Penjualan" />
+    <meta name="author" content="POS Keren" />
+    
+    <!-- Mobile Optimization -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="POS Keren" />
+    
+    <!-- Prevent zoom on mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <title>POS &amp; Inventory App - React.js Version</title>
@@ -11,5 +37,63 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Installation Script -->
+    <script>
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button or banner
+        const installBanner = document.createElement('div');
+        installBanner.innerHTML = `
+          <div style="position: fixed; top: 0; left: 0; right: 0; background: #6366f1; color: white; padding: 12px; text-align: center; z-index: 9999; font-family: system-ui;">
+            <span>📱 Install POS Keren untuk pengalaman yang lebih baik!</span>
+            <button id="install-btn" style="margin-left: 10px; background: white; color: #6366f1; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+              Install
+            </button>
+            <button id="dismiss-btn" style="margin-left: 8px; background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              Nanti
+            </button>
+          </div>
+        `;
+        document.body.appendChild(installBanner);
+        
+        document.getElementById('install-btn').addEventListener('click', () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+            document.body.removeChild(installBanner);
+          });
+        });
+        
+        document.getElementById('dismiss-btn').addEventListener('click', () => {
+          document.body.removeChild(installBanner);
+        });
+      });
+      
+      // Track app install
+      window.addEventListener('appinstalled', (evt) => {
+        console.log('App was installed');
+      });
+    </script>
   </body>
 </html>

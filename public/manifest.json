@@ -1,0 +1,85 @@
+{
+  "name": "POS & Inventory Management System",
+  "short_name": "POS Keren",
+  "description": "Sistem Point of Sale dan Manajemen Inventori yang canggih untuk bisnis Anda",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "id",
+  "categories": ["business", "productivity", "finance"],
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3795/3795042.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Kasir",
+      "short_name": "POS",
+      "description": "Buka sistem kasir",
+      "url": "/?page=pos",
+      "icons": [
+        {
+          "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
+          "sizes": "128x128"
+        }
+      ]
+    },
+    {
+      "name": "Inventori",
+      "short_name": "Stok",
+      "description": "Kelola inventori",
+      "url": "/?page=inventory",
+      "icons": [
+        {
+          "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
+          "sizes": "128x128"
+        }
+      ]
+    },
+    {
+      "name": "Laporan",
+      "short_name": "Reports",
+      "description": "Lihat laporan penjualan",
+      "url": "/?page=reports",
+      "icons": [
+        {
+          "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
+          "sizes": "128x128"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://via.placeholder.com/540x720/6366f1/ffffff?text=POS+Dashboard",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "https://via.placeholder.com/1024x768/6366f1/ffffff?text=POS+Desktop",
+      "sizes": "1024x768",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}

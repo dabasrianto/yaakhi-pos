@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
+import PWAInstallButton from '../PWA/PWAInstallButton';
 
 interface HeaderProps {
   currentPage: string;
@@ -89,6 +90,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
         </button>
         
         {getTrialStatusDisplay()}
+          {/* PWA Install Button */}
+          <PWAInstallButton />
+          
         <div className="text-right hidden sm:block">
           <div className="font-semibold text-sm lg:text-lg">{formatTime(currentTime)}</div>
           <div className="text-xs opacity-80 hidden lg:block">{formatDate(currentTime)}</div>

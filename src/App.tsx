@@ -13,6 +13,8 @@ import { FirebaseProvider } from './context/FirebaseContext';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { SettingsProvider } from './context/SettingsContext';
+import PWAUpdateNotification from './components/PWA/PWAUpdateNotification';
+import OfflineIndicator from './components/PWA/OfflineIndicator';
 import { useAuth } from './context/AuthContext';
 import POSPage from './components/POS/POSPage';
 import InventoryPage from './components/Inventory/InventoryPage';
@@ -89,6 +91,7 @@ const AppContent: React.FC = () => {
 
   return (
     <DataProvider>
+      <OfflineIndicator />
       <div className="w-full h-screen flex flex-col lg:flex-row bg-slate-50 text-slate-800 relative">
         <Sidebar 
           currentPage={currentPage}
@@ -102,6 +105,7 @@ const AppContent: React.FC = () => {
             {renderCurrentPage()}
           </main>
         </div>
+        <PWAUpdateNotification />
       </div>
     </DataProvider>
   );
