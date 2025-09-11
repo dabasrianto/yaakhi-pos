@@ -15,6 +15,7 @@ interface StoreSettings {
   autoBackup: boolean;
   lowStockAlert: number;
   themeColor: string;
+  language: string;
   printerSettings: {
     paperSize: string;
     copies: number;
@@ -22,11 +23,32 @@ interface StoreSettings {
   };
 }
 
+interface Translations {
+  welcome: string;
+  todayRevenue: string;
+  todayProfit: string;
+  todayTransactions: string;
+  stockValue: string;
+  inventory: string;
+  customers: string;
+}
+
+const indonesianTranslations: Translations = {
+  welcome: 'Selamat Datang',
+  todayRevenue: 'Pemasukan Hari Ini',
+  todayProfit: 'Keuntungan Hari Ini',
+  todayTransactions: 'Transaksi Hari Ini',
+  stockValue: 'Nilai Stok',
+  inventory: 'Inventori',
+  customers: 'Pelanggan'
+};
+
 interface SettingsContextType {
   settings: StoreSettings;
   loading: boolean;
   isDarkMode: boolean;
   toggleTheme: () => void;
+  translations: Translations;
 }
 
 const defaultSettings: StoreSettings = {
@@ -41,6 +63,7 @@ const defaultSettings: StoreSettings = {
   autoBackup: true,
   lowStockAlert: 5,
   themeColor: '#6366f1',
+  language: 'id',
   printerSettings: {
     paperSize: '80mm',
     copies: 1,
@@ -128,7 +151,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     settings,
     loading,
     isDarkMode,
-    toggleTheme
+    toggleTheme,
+    translations: indonesianTranslations
   };
 
   return (
