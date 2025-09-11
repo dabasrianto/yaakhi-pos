@@ -94,14 +94,12 @@ service cloud.firestore {
            (newData.storeEmail is string || !newData.keys().hasAny(['storeEmail'])) &&
            (newData.logoUrl is string || !newData.keys().hasAny(['logoUrl'])) &&
            (newData.currency is string || !newData.keys().hasAny(['currency'])) &&
-           (newData.currency in ['IDR', 'USD', 'EUR', 'GBP', 'JPY', 'SGD', 'MYR'] || !newData.keys().hasAny(['currency'])) &&
+           (newData.currency == 'IDR' || !newData.keys().hasAny(['currency'])) &&
            (newData.taxRate is number || !newData.keys().hasAny(['taxRate'])) &&
            (newData.taxRate >= 0 && newData.taxRate <= 100 || !newData.keys().hasAny(['taxRate'])) &&
            (newData.receiptFooter is string || !newData.keys().hasAny(['receiptFooter'])) &&
            (newData.theme is string || !newData.keys().hasAny(['theme'])) &&
            (newData.theme in ['light', 'dark', 'auto'] || !newData.keys().hasAny(['theme'])) &&
-           (newData.language is string || !newData.keys().hasAny(['language'])) &&
-           (newData.language in ['id', 'en'] || !newData.keys().hasAny(['language'])) &&
            (newData.autoBackup is bool || !newData.keys().hasAny(['autoBackup'])) &&
            (newData.lowStockAlert is number || !newData.keys().hasAny(['lowStockAlert'])) &&
            (newData.lowStockAlert >= 1 && newData.lowStockAlert <= 100 || !newData.keys().hasAny(['lowStockAlert'])) &&

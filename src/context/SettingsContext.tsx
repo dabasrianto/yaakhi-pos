@@ -11,7 +11,7 @@ interface StoreSettings {
   currency: string;
   taxRate: number;
   receiptFooter: string;
-  language: string;
+  theme: string;
   autoBackup: boolean;
   lowStockAlert: number;
   themeColor: string;
@@ -26,7 +26,7 @@ interface SettingsContextType {
   settings: StoreSettings;
   loading: boolean;
   isDarkMode: boolean;
-  translations: any;
+  toggleTheme: () => void;
 }
 
 const defaultSettings: StoreSettings = {
@@ -37,7 +37,7 @@ const defaultSettings: StoreSettings = {
   currency: 'IDR',
   taxRate: 11,
   receiptFooter: 'Terima kasih atas kunjungan Anda!',
-  language: 'id',
+  theme: 'light',
   autoBackup: true,
   lowStockAlert: 5,
   themeColor: '#6366f1',
@@ -47,7 +47,7 @@ const defaultSettings: StoreSettings = {
     autoPrint: false
   }
 };
-};
+
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -92,6 +92,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return () => mediaQuery.removeEventListener('change', applyTheme);
     }
   }, [settings.theme]);
+
   useEffect(() => {
     if (!user) {
       setSettings(defaultSettings);
@@ -122,13 +123,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const newTheme = isDarkMode ? 'light' : 'dark';
     setSettings(prev => ({ ...prev, theme: newTheme }));
   };
+
   const value = {
     settings,
     loading,
     isDarkMode,
-    toggleTheme,
-    currentLanguage: settings.language,
-    translations: translations[settings.language as keyof typeof translations] || translations.id
+    toggleTheme
   };
 
   return (

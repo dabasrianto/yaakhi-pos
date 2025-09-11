@@ -1,4 +1,4 @@
-export const formatCurrency = (amount: number | string): string => {
+export const formatCurrency = (amount: number | string, currency: string = 'IDR'): string => {
   const numAmount = Number(amount);
   
   // Handle invalid numbers

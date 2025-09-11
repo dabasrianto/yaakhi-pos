@@ -480,8 +480,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">{translations.welcome}</h1>
             <p className="text-white/80">
-              {settings.language === 'en' ? 'Monitor your business performance today - ' : 'Pantau performa bisnis Anda hari ini - '}
-              {new Date().toLocaleDateString(settings.language === 'en' ? 'en-US' : 'id-ID', { 
+              Pantau performa bisnis Anda hari ini - 
+              {new Date().toLocaleDateString('id-ID', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -490,8 +490,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold">{formatCurrency(dailyRevenue, settings.currency)}</div>
-            <div className="text-white/70 text-sm">{translations.todayRevenue}</div>
+            <div className="text-3xl font-bold">{formatCurrency(dailyRevenue)}</div>
+            <div className="text-white/70 text-sm">Pemasukan Hari Ini</div>
           </div>
         </div>
       </div>
@@ -506,10 +506,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <p className="text-sm text-gray-600 dark:text-gray-300">{translations.todayRevenue}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(dailyRevenue, settings.currency)}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(dailyRevenue)}</p>
               <p className={`text-xs flex items-center mt-1 ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 <i className={`lni ${revenueChange >= 0 ? 'lni-arrow-up' : 'lni-arrow-down'} text-xs mr-1`}></i>
-                {revenueChange >= 0 ? '+' : ''}{revenueChange.toFixed(1)}% {settings.language === 'en' ? 'vs yesterday' : 'vs kemarin'}
+                {revenueChange >= 0 ? '+' : ''}{revenueChange.toFixed(1)}% vs kemarin
               </p>
             </div>
             <div 
@@ -538,10 +538,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <p className="text-sm text-gray-600 dark:text-gray-300">{translations.todayProfit}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(dailyProfit, settings.currency)}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(dailyProfit)}</p>
               <p className={`text-xs flex items-center mt-1 ${profitChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 <i className={`lni ${profitChange >= 0 ? 'lni-arrow-up' : 'lni-arrow-down'} text-xs mr-1`}></i>
-                {profitChange >= 0 ? '+' : ''}{profitChange.toFixed(1)}% {settings.language === 'en' ? 'vs yesterday' : 'vs kemarin'}
+                {profitChange >= 0 ? '+' : ''}{profitChange.toFixed(1)}% vs kemarin
               </p>
             </div>
             <div 
@@ -573,7 +573,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{dailyTransactions}</p>
               <p className={`text-xs flex items-center mt-1 ${transactionChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 <i className={`lni ${transactionChange >= 0 ? 'lni-arrow-up' : 'lni-arrow-down'} text-xs mr-1`}></i>
-                {transactionChange >= 0 ? '+' : ''}{transactionChange.toFixed(1)}% {settings.language === 'en' ? 'vs yesterday' : 'vs kemarin'}
+                {transactionChange >= 0 ? '+' : ''}{transactionChange.toFixed(1)}% vs kemarin
               </p>
             </div>
             <div 
@@ -602,8 +602,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-300">{translations.stockValue}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(inventoryValue, settings.currency)}</p>
-              <p className="text-xs text-gray-500">{products.length} {settings.language === 'en' ? 'products' : 'produk'}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(inventoryValue)}</p>
+              <p className="text-xs text-gray-500">{products.length} produk</p>
             </div>
             <div 
               className="p-3 rounded-full"

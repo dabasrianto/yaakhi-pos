@@ -428,11 +428,9 @@ const SettingsPage: React.FC = () => {
                       Gunakan URL gambar online atau upload ke layanan seperti Imgur
                     </p>
                   </div>
-                </div>
               </div>
             </div>
           )}
-
           {/* Display Tab */}
           {activeTab === 'display' && (
             <div className="space-y-6">
@@ -451,35 +449,6 @@ const SettingsPage: React.FC = () => {
                       <option value="light">Terang</option>
                       <option value="dark">Gelap</option>
                       <option value="auto">Otomatis</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Bahasa
-                    </label>
-                    <select
-                      value={settings.language}
-                      onChange={(e) => handleInputChange('language', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="id">Bahasa Indonesia</option>
-                      <option value="en">English</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Mata Uang
-                    </label>
-                    <select
-                      value={settings.currency}
-                      onChange={(e) => handleInputChange('currency', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="IDR">Rupiah (IDR)</option>
-                      <option value="USD">US Dollar (USD)</option>
-                      <option value="EUR">Euro (EUR)</option>
                     </select>
                   </div>
                   
