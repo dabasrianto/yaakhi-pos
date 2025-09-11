@@ -242,7 +242,7 @@ const InventoryPage: React.FC = () => {
                                 className="w-10 h-10 flex items-center justify-center rounded-lg text-lg"
                                 style={{ backgroundColor: `${iconColor}20`, color: iconColor }}
                               >
-                                <i className={iconClass}></i>
+                                <i className={iconClass} key={product.id}></i>
                               </div>
                               <div>
                                 <p className="font-medium text-slate-800">{product.name}</p>

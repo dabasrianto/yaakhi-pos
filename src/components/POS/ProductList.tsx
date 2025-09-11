@@ -56,7 +56,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onAddToCart }) => {
               className="w-12 h-12 lg:w-16 lg:h-16 flex-shrink-0 flex items-center justify-center rounded-lg text-xl lg:text-3xl"
               style={{ backgroundColor: bgColor, color: iconColor }}
             >
-              <i className={iconClass}></i>
+              <i className={iconClass} key={product.id}></i>
             </div>
             
             <div className="flex-grow w-full text-center lg:text-left">

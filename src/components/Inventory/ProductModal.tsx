@@ -140,12 +140,64 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product })
               value={formData.icon}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder="Contoh: fas fa-coffee"
+              placeholder="Contoh: fas fa-coffee, lni lni-coffee-cup"
             />
             <p className="text-xs text-slate-500 mt-1">
-              Cari ikon di <a href="https://fontawesome.com/icons" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Font Awesome</a>. 
-              Contoh: fas fa-coffee, fas fa-hamburger, fas fa-wine-bottle
+              Cari ikon di <a href="https://fontawesome.com/icons" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Font Awesome</a> atau <a href="https://lineicons.com/icons/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">LineIcons</a>.<br/>
+              FontAwesome: fas fa-coffee, fas fa-hamburger, fas fa-wine-bottle<br/>
+              LineIcons: lni lni-coffee-cup, lni lni-burger, lni lni-dinner
             </p>
+          </div>
+
+          {/* Icon Preview */}
+          {formData.icon && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 mb-2">Preview Ikon</label>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                <div
+                  className="w-12 h-12 flex items-center justify-center rounded-lg text-2xl"
+                  style={{ backgroundColor: `${formData.iconColor}20`, color: formData.iconColor }}
+                >
+                  <i className={formData.icon}></i>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700">Kelas: {formData.icon}</p>
+                  <p className="text-xs text-slate-500">Warna: {formData.iconColor}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Popular Icons Suggestions */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Ikon Populer</label>
+            <div className="grid grid-cols-6 gap-2">
+              {[
+                { icon: 'fas fa-coffee', name: 'Kopi' },
+                { icon: 'fas fa-hamburger', name: 'Burger' },
+                { icon: 'fas fa-pizza-slice', name: 'Pizza' },
+                { icon: 'fas fa-ice-cream', name: 'Es Krim' },
+                { icon: 'fas fa-wine-bottle', name: 'Minuman' },
+                { icon: 'fas fa-bread-slice', name: 'Roti' },
+                { icon: 'lni lni-coffee-cup', name: 'Kopi' },
+                { icon: 'lni lni-burger', name: 'Burger' },
+                { icon: 'lni lni-dinner', name: 'Makanan' },
+                { icon: 'lni lni-cake', name: 'Kue' },
+                { icon: 'lni lni-juice', name: 'Jus' },
+                { icon: 'lni lni-restaurant', name: 'Restoran' }
+              ].map((item, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, icon: item.icon }))}
+                  className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 flex flex-col items-center gap-1 text-xs"
+                  title={item.name}
+                >
+                  <i className={`${item.icon} text-lg`} style={{ color: formData.iconColor }}></i>
+                  <span className="text-xs text-slate-600 truncate w-full text-center">{item.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="mb-4">
