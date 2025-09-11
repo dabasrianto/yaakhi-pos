@@ -38,6 +38,7 @@ const auth = getAuth(app);
 const AppContent: React.FC = () => {
   const { user, loading, trialStatus } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard-page');
+  const [showLogin, setShowLogin] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   useEffect(() => {
