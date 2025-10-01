@@ -19,6 +19,7 @@ const ReportsPage: React.FC = () => {
 
   useEffect(() => {
     filterSales();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sales, filter, customStartDate, customEndDate]);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ const ReportsPage: React.FC = () => {
         chartInstance.current.destroy();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredSales]);
 
   const filterSales = () => {

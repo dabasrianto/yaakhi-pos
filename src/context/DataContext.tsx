@@ -64,7 +64,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const appId = app.options.projectId || '';
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     const unsubscribes: Array<() => void> = [];
 
@@ -115,6 +118,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       unsubscribes.forEach(unsubscribe => unsubscribe());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, db, appId]);
 
   const seedInitialData = async () => {

@@ -135,16 +135,6 @@ const InventoryPage: React.FC = () => {
               Laporan Keuangan
             </button>
           )}
-          <button
-            onClick={() => setActiveTab('financial')}
-            className={`shrink-0 border-b-2 px-1 pb-4 text-sm font-medium ${
-              activeTab === 'financial'
-                ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-            }`}
-          >
-            Laporan Keuangan
-          </button>
         </nav>
       </div>
 
@@ -306,6 +296,35 @@ const InventoryPage: React.FC = () => {
                     })
                 )}
               </tbody>
+              {products.length > 0 && (
+                <tfoot className="bg-slate-50 border-t-2 border-slate-300">
+                  <tr>
+                    <td colSpan={4} className="py-4 px-4 font-bold text-slate-800 text-base">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                        TOTAL KESELURUHAN
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 font-bold text-slate-800 text-base">
+                      {products.reduce((sum, p) => sum + p.stock, 0)} unit
+                    </td>
+                    <td className="py-4 px-4 font-bold text-orange-600 text-base">
+                      {formatCurrency(products.reduce((sum, p) => sum + (p.costPrice * p.stock), 0))}
+                    </td>
+                    <td className="py-4 px-4 font-bold text-green-600 text-base">
+                      {formatCurrency(products.reduce((sum, p) => sum + (p.price * p.stock), 0))}
+                    </td>
+                    <td className="py-4 px-4" colSpan={2}>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-slate-500">Potensi Profit</span>
+                        <span className="font-bold text-blue-600 text-base">
+                          {formatCurrency(products.reduce((sum, p) => sum + ((p.price - p.costPrice) * p.stock), 0))}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </div>

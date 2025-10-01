@@ -48,7 +48,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       setCustomDate(now.toISOString().split('T')[0]);
       setCustomTime(now.toTimeString().slice(0, 5));
     }
-  }, [isOpen]);
+  }, [isOpen, customDate]);
   const handlePayment = async (paymentMethod: string) => {
     if (!user) return;
 

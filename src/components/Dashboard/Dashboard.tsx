@@ -39,6 +39,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         if (instance) instance.destroy();
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sales, products]);
 
   const getTodayStats = () => {
