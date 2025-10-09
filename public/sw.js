@@ -1,61 +1,111 @@
-const CACHE_NAME = 'pos-keren-v1.0.0';
-const STATIC_CACHE = 'pos-static-v1.0.0';
-const DYNAMIC_CACHE = 'pos-dynamic-v1.0.0';
+const CACHE_VERSION = 'v1.1.0';
+const CACHE_NAME = `pos-keren-${CACHE_VERSION}`;
+const STATIC_CACHE = `pos-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `pos-dynamic-${CACHE_VERSION}`;
+const IMAGE_CACHE = `pos-images-${CACHE_VERSION}`;
 
 // Files to cache immediately
 const STATIC_FILES = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/icon.svg',
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
   'https://cdn.lineicons.com/4.0/lineicons.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdn-icons-png.flaticon.com/128/3795/3795042.png',
-  'https://cdn-icons-png.flaticon.com/192/3795/3795042.png',
-  'https://cdn-icons-png.flaticon.com/512/3795/3795042.png'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
+
+// Max cache size
+const MAX_CACHE_SIZE = 50;
+const MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Install event - cache static files
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
-  self.skipWaiting(); // Force activation
+  console.log('[SW] Installing service worker...', CACHE_VERSION);
+
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('Service Worker: Caching static files');
-        return cache.addAll(STATIC_FILES);
+        console.log('[SW] Caching static files');
+        return cache.addAll(STATIC_FILES).catch((error) => {
+          console.error('[SW] Error caching static files:', error);
+          // Don't fail installation if some files fail to cache
+          return Promise.resolve();
+        });
       })
       .then(() => {
-        console.log('Service Worker: Static files cached');
-      })
-      .catch((error) => {
-        console.error('Service Worker: Error caching static files', error);
+        console.log('[SW] Static files cached successfully');
+        return self.skipWaiting(); // Activate immediately
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
+  console.log('[SW] Activating service worker...', CACHE_VERSION);
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log('Service Worker: Deleting old cache', cacheName);
+            if (cacheName.startsWith('pos-') &&
+                cacheName !== STATIC_CACHE &&
+                cacheName !== DYNAMIC_CACHE &&
+                cacheName !== IMAGE_CACHE) {
+              console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('Service Worker: Activated');
-        return self.clients.claim();
+        console.log('[SW] Service worker activated');
+        return self.clients.claim(); // Take control immediately
       })
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Helper function to limit cache size
+async function limitCacheSize(cacheName, maxSize) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+
+  if (keys.length > maxSize) {
+    console.log(`[SW] Cache ${cacheName} exceeded ${maxSize} items, cleaning up`);
+    await cache.delete(keys[0]);
+    await limitCacheSize(cacheName, maxSize);
+  }
+}
+
+// Helper function to check if response is valid
+function isValidResponse(response) {
+  return response &&
+         response.status === 200 &&
+         response.type === 'basic';
+}
+
+// Helper function to check if request should be cached
+function shouldCache(request) {
+  const url = new URL(request.url);
+
+  // Don't cache Firebase/Firestore requests
+  if (url.hostname.includes('firebase') ||
+      url.hostname.includes('googleapis') ||
+      url.hostname.includes('firestore') ||
+      url.hostname.includes('google-analytics')) {
+    return false;
+  }
+
+  // Don't cache auth requests
+  if (url.pathname.includes('/auth/')) {
+    return false;
+  }
+
+  return true;
+}
+
+// Fetch event - Network First with Cache Fallback for dynamic content
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -65,136 +115,255 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip Firebase and external API requests
-  if (url.hostname.includes('firebase') || 
-      url.hostname.includes('googleapis') ||
-      url.hostname.includes('firestore')) {
+  // Skip requests that shouldn't be cached
+  if (!shouldCache(request)) {
+    event.respondWith(fetch(request));
     return;
   }
 
-  event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
+  // Cache First strategy for static assets (CSS, JS, fonts, images)
+  if (request.destination === 'style' ||
+      request.destination === 'script' ||
+      request.destination === 'font' ||
+      request.destination === 'image') {
+
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
-          console.log('Service Worker: Serving from cache', request.url);
           return cachedResponse;
         }
 
-        // Clone the request for caching
-        const fetchRequest = request.clone();
-
-        return fetch(fetchRequest)
-          .then((response) => {
-            // Check if valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response for caching
+        return fetch(request).then((response) => {
+          if (isValidResponse(response)) {
+            const cacheName = request.destination === 'image' ? IMAGE_CACHE : STATIC_CACHE;
             const responseToCache = response.clone();
 
-            // Cache dynamic content
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => {
-                console.log('Service Worker: Caching dynamic content', request.url);
-                cache.put(request, responseToCache);
-              });
+            caches.open(cacheName).then((cache) => {
+              cache.put(request, responseToCache);
+              limitCacheSize(cacheName, MAX_CACHE_SIZE);
+            });
+          }
 
-            return response;
-          })
-          .catch((error) => {
-            console.error('Service Worker: Fetch failed', error);
-            
-            // Return offline page for navigation requests
-            if (request.destination === 'document') {
-              return caches.match('/index.html');
-            }
-            
-            throw error;
+          return response;
+        }).catch(() => {
+          // Return offline fallback if available
+          return caches.match(request);
+        });
+      })
+    );
+    return;
+  }
+
+  // Network First strategy for HTML and API requests
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        // Cache successful responses
+        if (isValidResponse(response)) {
+          const responseToCache = response.clone();
+
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseToCache);
+            limitCacheSize(DYNAMIC_CACHE, MAX_CACHE_SIZE);
           });
+        }
+
+        return response;
+      })
+      .catch(() => {
+        // Try to return cached version
+        return caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          // Return offline page for navigation requests
+          if (request.destination === 'document') {
+            return caches.match('/index.html');
+          }
+
+          // Return a custom offline response
+          return new Response('Offline - Content not available', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+              'Content-Type': 'text/plain'
+            })
+          });
+        });
       })
   );
 });
 
 // Background sync for offline data
 self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background sync', event.tag);
-  
+  console.log('[SW] Background sync triggered:', event.tag);
+
   if (event.tag === 'pos-data-sync') {
-    event.waitUntil(
-      // Sync offline data when connection is restored
-      syncOfflineData()
-    );
+    event.waitUntil(syncOfflineData());
   }
 });
 
 // Push notifications
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push received');
-  
+  console.log('[SW] Push notification received');
+
+  let notificationData = {
+    title: 'POS Keren',
+    body: 'Notifikasi dari POS Keren',
+    icon: '/icon.svg',
+    badge: '/icon.svg'
+  };
+
+  if (event.data) {
+    try {
+      notificationData = event.data.json();
+    } catch (e) {
+      notificationData.body = event.data.text();
+    }
+  }
+
   const options = {
-    body: event.data ? event.data.text() : 'Notifikasi dari POS Keren',
-    icon: 'https://cdn-icons-png.flaticon.com/128/3795/3795042.png',
-    badge: 'https://cdn-icons-png.flaticon.com/128/3795/3795042.png',
+    body: notificationData.body,
+    icon: notificationData.icon || '/icon.svg',
+    badge: notificationData.badge || '/icon.svg',
     vibrate: [200, 100, 200],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: 1
+      primaryKey: notificationData.primaryKey || 1,
+      url: notificationData.url || '/'
     },
     actions: [
       {
-        action: 'explore',
-        title: 'Buka Aplikasi',
-        icon: 'https://cdn-icons-png.flaticon.com/128/3795/3795042.png'
+        action: 'open',
+        title: 'Buka',
+        icon: '/icon.svg'
       },
       {
         action: 'close',
         title: 'Tutup',
-        icon: 'https://cdn-icons-png.flaticon.com/128/3795/3795042.png'
+        icon: '/icon.svg'
       }
-    ]
+    ],
+    tag: notificationData.tag || 'pos-notification',
+    requireInteraction: false,
+    renotify: true
   };
 
   event.waitUntil(
-    self.registration.showNotification('POS Keren', options)
+    self.registration.showNotification(notificationData.title, options)
   );
 });
 
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked');
-  
+  console.log('[SW] Notification clicked:', event.action);
+
   event.notification.close();
 
-  if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+  if (event.action === 'close') {
+    return;
   }
+
+  const urlToOpen = event.notification.data.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (let client of clientList) {
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
+        }
+
+        // Open new window if not already open
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
 });
 
 // Helper function to sync offline data
 async function syncOfflineData() {
   try {
-    console.log('Service Worker: Syncing offline data...');
-    // Implementation for syncing offline data would go here
-    // This could include sending cached transactions to Firebase
+    console.log('[SW] Syncing offline data...');
+
+    // Get all clients
+    const allClients = await clients.matchAll({ includeUncontrolled: true });
+
+    // Send sync message to all clients
+    allClients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_OFFLINE_DATA',
+        timestamp: Date.now()
+      });
+    });
+
     return Promise.resolve();
   } catch (error) {
-    console.error('Service Worker: Error syncing offline data', error);
+    console.error('[SW] Error syncing offline data:', error);
     throw error;
   }
 }
 
 // Message handler for communication with main thread
 self.addEventListener('message', (event) => {
-  console.log('Service Worker: Message received', event.data);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: CACHE_NAME });
+  console.log('[SW] Message received:', event.data);
+
+  if (!event.data) return;
+
+  switch (event.data.type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+
+    case 'GET_VERSION':
+      event.ports[0].postMessage({ version: CACHE_VERSION });
+      break;
+
+    case 'CLEAR_CACHE':
+      event.waitUntil(
+        caches.keys().then((cacheNames) => {
+          return Promise.all(
+            cacheNames.map((cacheName) => {
+              if (cacheName.startsWith('pos-')) {
+                console.log('[SW] Clearing cache:', cacheName);
+                return caches.delete(cacheName);
+              }
+            })
+          );
+        }).then(() => {
+          event.ports[0].postMessage({ success: true });
+        })
+      );
+      break;
+
+    case 'CACHE_URLS':
+      if (event.data.urls && Array.isArray(event.data.urls)) {
+        event.waitUntil(
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            return cache.addAll(event.data.urls);
+          }).then(() => {
+            event.ports[0].postMessage({ success: true });
+          })
+        );
+      }
+      break;
+
+    default:
+      console.log('[SW] Unknown message type:', event.data.type);
   }
 });
+
+// Periodic background sync (if supported)
+self.addEventListener('periodicsync', (event) => {
+  console.log('[SW] Periodic sync triggered:', event.tag);
+
+  if (event.tag === 'content-sync') {
+    event.waitUntil(syncOfflineData());
+  }
+});
+
+console.log('[SW] Service Worker loaded:', CACHE_VERSION);

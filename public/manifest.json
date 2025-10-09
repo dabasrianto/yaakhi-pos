@@ -1,103 +1,161 @@
 {
   "name": "POS & Inventory Management System",
   "short_name": "POS Keren",
-  "description": "Sistem Point of Sale dan Manajemen Inventori yang canggih untuk bisnis Anda",
-  "start_url": "/?utm_source=pwa",
+  "description": "Sistem Point of Sale dan Manajemen Inventori yang canggih untuk bisnis Anda. Kelola kasir, inventori, pelanggan, dan laporan penjualan dengan mudah.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6366f1",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "id",
+  "lang": "id-ID",
+  "dir": "ltr",
   "categories": ["business", "productivity", "finance"],
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
-      "sizes": "192x192",
-      "type": "image/png",
+      "src": "/icon.svg",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
+      "src": "/icon.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
       "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
-      "sizes": "192x192",
-      "type": "image/png",
+      "src": "/icon.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/192/3795/3795042.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3795/3795042.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/icon.svg",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3795/3795042.png",
+      "src": "/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Kasir",
       "short_name": "POS",
-      "description": "Buka sistem kasir",
+      "description": "Buka sistem kasir untuk transaksi",
       "url": "/?page=pos",
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
-          "sizes": "128x128"
+          "src": "/icon.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
         }
       ]
     },
     {
       "name": "Inventori",
       "short_name": "Stok",
-      "description": "Kelola inventori",
+      "description": "Kelola inventori dan stok barang",
       "url": "/?page=inventory",
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
-          "sizes": "128x128"
+          "src": "/icon.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
         }
       ]
     },
     {
       "name": "Laporan",
       "short_name": "Reports",
-      "description": "Lihat laporan penjualan",
+      "description": "Lihat laporan penjualan dan keuangan",
       "url": "/?page=reports",
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/128/3795/3795042.png",
-          "sizes": "128x128"
+          "src": "/icon.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Pelanggan",
+      "short_name": "Customer",
+      "description": "Kelola data pelanggan",
+      "url": "/?page=customers",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
         }
       ]
     }
   ],
   "screenshots": [
     {
-      "src": "https://via.placeholder.com/540x720/6366f1/ffffff?text=POS+Dashboard",
+      "src": "/screenshots/mobile-pos.png",
       "sizes": "540x720",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Sistem Kasir POS"
     },
     {
-      "src": "https://via.placeholder.com/1024x768/6366f1/ffffff?text=POS+Desktop",
-      "sizes": "1024x768",
+      "src": "/screenshots/mobile-inventory.png",
+      "sizes": "540x720",
       "type": "image/png",
-      "form_factor": "wide"
+      "form_factor": "narrow",
+      "label": "Manajemen Inventori"
+    },
+    {
+      "src": "/screenshots/mobile-reports.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Laporan Penjualan"
+    },
+    {
+      "src": "/screenshots/desktop-dashboard.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard Desktop"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "related_applications": [],
+  "iarc_rating_id": ""
 }
