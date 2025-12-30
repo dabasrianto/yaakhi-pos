@@ -243,7 +243,6 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ filteredSales }
               <th className="text-left py-3 px-4 font-medium text-slate-600 text-sm">
                 <input type="checkbox" className="rounded border-slate-300" />
               </th>
-              <th className="text-left py-3 px-4 font-medium text-slate-600 text-sm">ID Transaksi</th>
               <th className="text-left py-3 px-4 font-medium text-slate-600 text-sm">Tanggal & Waktu</th>
               <th className="text-left py-3 px-4 font-medium text-slate-600 text-sm">Pelanggan</th>
               <th className="text-left py-3 px-4 font-medium text-slate-600 text-sm">Items</th>
@@ -256,7 +255,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ filteredSales }
           <tbody>
             {processedTransactions.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-slate-500">
+                <td colSpan={8} className="text-center py-12 text-slate-500">
                   <div className="flex flex-col items-center gap-2">
                     <i className="fas fa-receipt text-3xl text-slate-300"></i>
                     <p>Tidak ada transaksi ditemukan</p>
@@ -269,11 +268,6 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ filteredSales }
                 <tr key={sale.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="py-3 px-4">
                     <input type="checkbox" className="rounded border-slate-300" />
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-mono text-sm text-slate-600">
-                      #{sale.id.substring(0, 8)}...
-                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <div>
@@ -342,7 +336,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ filteredSales }
           {processedTransactions.length > 0 && (
             <tfoot className="bg-slate-50 border-t-2 border-slate-300">
               <tr>
-                <td colSpan={4} className="py-4 px-4 font-bold text-slate-800 text-lg">
+                <td colSpan={3} className="py-4 px-4 font-bold text-slate-800 text-lg">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
                     TOTAL RINGKASAN

@@ -196,7 +196,6 @@ const InventoryPage: React.FC = () => {
                     <input type="checkbox" className="rounded border-slate-300" />
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-slate-600">Produk</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-600">ID Produk</th>
                   <th className="text-left py-3 px-4 font-medium text-slate-600">Kategori</th>
                   <th className="text-left py-3 px-4 font-medium text-slate-600">Stok</th>
                   <th className="text-left py-3 px-4 font-medium text-slate-600">Harga Modal</th>
@@ -208,7 +207,7 @@ const InventoryPage: React.FC = () => {
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-8 text-slate-500">
+                    <td colSpan={8} className="text-center py-8 text-slate-500">
                       Belum ada produk.
                     </td>
                   </tr>
@@ -239,9 +238,6 @@ const InventoryPage: React.FC = () => {
                                 <p className="text-sm text-slate-500">{product.brand || 'Tanpa Merek'}</p>
                               </div>
                             </div>
-                          </td>
-                          <td className="py-3 px-4 text-slate-600 font-mono text-sm">
-                            {product.id.substring(0, 8)}...
                           </td>
                           <td className="py-3 px-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
