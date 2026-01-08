@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { useSettings } from '../../context/SettingsContext';
 import { formatCurrency } from '../../utils/formatters';
-import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { useFirebase } from '../../context/FirebaseContext';
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 
 interface TransactionModalProps {
@@ -13,15 +12,14 @@ interface TransactionModalProps {
   mode: 'view' | 'edit';
 }
 
-const TransactionModal: React.FC<TransactionModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  transaction, 
-  mode 
+const TransactionModal: React.FC<TransactionModalProps> = ({
+  isOpen,
+  onClose,
+  transaction,
+  mode,
 }) => {
   const { customers } = useData();
   const { settings } = useSettings();
-  const { db, app } = useFirebase();
   const { user } = useAuth();
   const [editMode, setEditMode] = useState(mode === 'edit');
   const [loading, setLoading] = useState(false);
@@ -30,10 +28,8 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     customerId: '',
     discount: { type: 'rp', value: 0, amount: 0 },
     tax: { type: 'percent', value: 11, amount: 0 },
-    notes: ''
+    notes: '',
   });
-
-  const appId = app.options.projectId || '';
 
   useEffect(() => {
     if (transaction) {
@@ -42,27 +38,25 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
         customerId: transaction.customer?.id || '0',
         discount: transaction.discount || { type: 'rp', value: 0, amount: 0 },
         tax: transaction.tax || { type: 'percent', value: 11, amount: 0 },
-        notes: transaction.notes || ''
+        notes: transaction.notes || '',
       });
     }
   }, [transaction]);
 
   const handleSave = async () => {
     if (!user || !transaction) return;
-    
+
     setLoading(true);
     try {
-      const customer = customers.find(c => c.id === formData.customerId);
-      const transactionRef = doc(db, 'artifacts', appId, 'users', user.uid, 'sales', transaction.id);
-      
-      // Recalculate totals
+      const customer = customers.find((c) => c.id === formData.customerId);
+
       let discountAmount = 0;
       if (formData.discount.type === 'percent') {
         discountAmount = (transaction.subtotal * formData.discount.value) / 100;
       } else {
         discountAmount = formData.discount.value;
       }
-      
+
       let taxAmount = 0;
       const taxableAmount = transaction.subtotal - discountAmount;
       if (formData.tax.type === 'percent') {
@@ -70,19 +64,22 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       } else {
         taxAmount = formData.tax.value;
       }
-      
+
       const finalTotal = taxableAmount + taxAmount;
-      
-      await updateDoc(transactionRef, {
-        paymentMethod: formData.paymentMethod,
-        customer: customer ? { id: customer.id, name: customer.name } : null,
-        discount: { ...formData.discount, amount: discountAmount },
-        tax: { ...formData.tax, amount: taxAmount },
-        finalTotal: finalTotal,
-        notes: formData.notes,
-        updatedAt: new Date()
-      });
-      
+
+      await supabase
+        .from('sales')
+        .update({
+          payment_method: formData.paymentMethod,
+          customer_id: customer?.id || null,
+          customer_name: customer?.name || '',
+          discount: { ...formData.discount, amount: discountAmount },
+          tax: { ...formData.tax, amount: taxAmount },
+          final_total: finalTotal,
+        })
+        .eq('id', transaction.id)
+        .eq('user_id', user.id);
+
       setEditMode(false);
       onClose();
     } catch (error) {
@@ -95,15 +92,17 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const handleDelete = async () => {
     if (!user || !transaction) return;
-    
-    if (!window.confirm('Yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) {
+
+    if (
+      !window.confirm('Yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')
+    ) {
       return;
     }
-    
+
     setLoading(true);
     try {
-      const transactionRef = doc(db, 'artifacts', appId, 'users', user.uid, 'sales', transaction.id);
-      await deleteDoc(transactionRef);
+      await supabase.from('sales').delete().eq('id', transaction.id).eq('user_id', user.id);
+
       onClose();
     } catch (error) {
       console.error('Error deleting transaction:', error);

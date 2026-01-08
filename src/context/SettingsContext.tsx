@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { useFirebase } from './FirebaseContext';
 import { useAuth } from './AuthContext';
 
 interface StoreSettings {
@@ -40,7 +38,7 @@ const indonesianTranslations: Translations = {
   todayTransactions: 'Transaksi Hari Ini',
   stockValue: 'Nilai Stok',
   inventory: 'Inventori',
-  customers: 'Pelanggan'
+  customers: 'Pelanggan',
 };
 
 interface SettingsContextType {
@@ -67,8 +65,8 @@ const defaultSettings: StoreSettings = {
   printerSettings: {
     paperSize: '80mm',
     copies: 1,
-    autoPrint: false
-  }
+    autoPrint: false,
+  },
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -77,16 +75,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const { db, app } = useFirebase();
   const { user } = useAuth();
 
-  const appId = app.options.projectId || '';
-
-  // Apply theme to document
   useEffect(() => {
     const applyTheme = () => {
       const root = document.documentElement;
-      
+
       if (settings.theme === 'dark') {
         root.classList.add('dark');
         setIsDarkMode(true);
@@ -94,7 +88,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         root.classList.remove('dark');
         setIsDarkMode(false);
       } else {
-        // Auto theme based on system preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (prefersDark) {
           root.classList.add('dark');
@@ -108,7 +101,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     applyTheme();
 
-    // Listen for system theme changes if auto mode
     if (settings.theme === 'auto') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       mediaQuery.addEventListener('change', applyTheme);
@@ -123,28 +115,34 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    const settingsRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'store');
-    
-    const unsubscribe = onSnapshot(settingsRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data() as StoreSettings;
-        setSettings(prev => ({ ...prev, ...data }));
-      } else {
+    const settingsKey = `settings_${user.id}`;
+    const savedSettings = localStorage.getItem(settingsKey);
+
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        setSettings((prev) => ({ ...prev, ...parsed }));
+      } catch (error) {
+        console.error('Error parsing settings:', error);
         setSettings(defaultSettings);
       }
-      setLoading(false);
-    }, (error) => {
-      console.error('Error listening to settings:', error);
+    } else {
       setSettings(defaultSettings);
-      setLoading(false);
-    });
+    }
 
-    return unsubscribe;
-  }, [user, db, appId]);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    if (user && settings !== defaultSettings) {
+      const settingsKey = `settings_${user.id}`;
+      localStorage.setItem(settingsKey, JSON.stringify(settings));
+    }
+  }, [settings, user]);
 
   const toggleTheme = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
-    setSettings(prev => ({ ...prev, theme: newTheme }));
+    setSettings((prev) => ({ ...prev, theme: newTheme }));
   };
 
   const value = {
@@ -152,14 +150,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loading,
     isDarkMode,
     toggleTheme,
-    translations: indonesianTranslations
+    translations: indonesianTranslations,
   };
 
-  return (
-    <SettingsContext.Provider value={value}>
-      {children}
-    </SettingsContext.Provider>
-  );
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
 export const useSettings = () => {

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirebase } from './FirebaseContext';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -18,22 +17,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [trialStatus, setTrialStatus] = useState<'trial' | 'active' | 'expired'>('trial');
   const [trialDaysLeft, setTrialDaysLeft] = useState(7);
-  const { auth, db, app } = useFirebase();
-
-  const appId = app.options.projectId || '';
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
-      setLoading(true);
-      
-      if (user) {
-        try {
-          await handleUserSession(user);
-        } catch (error) {
-          console.error('Error handling user session:', error);
-          setLoading(false);
-        }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        handleUserSession(session.user);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        handleUserSession(session.user);
       } else {
         setUser(null);
         setTrialStatus('trial');
@@ -42,38 +40,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    return unsubscribe;
-  }, [auth, db, appId]);
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleUserSession = async (user: User) => {
-    console.log('Handling user session for:', user.email);
-    
     try {
-      const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (!userDoc.exists()) {
-        console.log('Creating new user document');
-        await setDoc(userDocRef, {
-          email: user.email,
-          displayName: user.displayName,
-          createdAt: serverTimestamp(),
-          subscriptionStatus: 'trial',
-        });
+      if (error && error.code !== 'PGRST116') {
+        throw error;
       }
 
-      const userData = (await getDoc(userDocRef)).data();
-      const creationTime = user.metadata.creationTime ? new Date(user.metadata.creationTime) : new Date();
+      if (!profile) {
+        const { error: insertError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            display_name: user.user_metadata?.display_name || '',
+            subscription_status: 'trial',
+            trial_start_date: new Date().toISOString(),
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      const profileData = profile || {
+        subscription_status: 'trial',
+        trial_start_date: new Date().toISOString(),
+      };
+
+      const trialStartDate = new Date(profileData.trial_start_date || user.created_at);
       const now = new Date();
       const trialDays = 7;
-      const daysSinceCreation = (now.getTime() - creationTime.getTime()) / (1000 * 60 * 60 * 24);
+      const daysSinceCreation = (now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24);
       const trialExpired = daysSinceCreation > trialDays;
-      
-      console.log('User data:', userData);
-      console.log('Days since creation:', daysSinceCreation);
-      console.log('Trial expired:', trialExpired);
-      
-      if (userData?.subscriptionStatus === 'active') {
+
+      if (profileData.subscription_status === 'active') {
         setTrialStatus('active');
         setTrialDaysLeft(0);
       } else if (trialExpired) {
@@ -85,11 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setUser(user);
-      console.log('User session handled successfully');
-      
     } catch (error) {
       console.error('Error handling user session:', error);
-      // Don't set user if there's an error, but still stop loading
       setUser(null);
     } finally {
       setLoading(false);
@@ -98,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -109,14 +113,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     trialStatus,
     trialDaysLeft,
-    logout
+    logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

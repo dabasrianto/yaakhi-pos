@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, updateDoc, writeBatch, collection, getDocs } from 'firebase/firestore';
-import { useFirebase } from '../../context/FirebaseContext';
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -26,7 +25,6 @@ interface StoreSettings {
 }
 
 const SettingsPage: React.FC = () => {
-  const { db, app } = useFirebase();
   const { user } = useAuth();
   const [settings, setSettings] = useState<StoreSettings>({
     storeName: 'POS Keren',
@@ -45,30 +43,28 @@ const SettingsPage: React.FC = () => {
     printerSettings: {
       paperSize: '80mm',
       copies: 1,
-      autoPrint: false
-    }
+      autoPrint: false,
+    },
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('store');
   const [saveMessage, setSaveMessage] = useState('');
 
-  const appId = app.options.projectId || '';
-
   useEffect(() => {
     loadSettings();
   }, [user]);
 
-  const loadSettings = async () => {
+  const loadSettings = () => {
     if (!user) return;
-    
+
     try {
-      const settingsRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'store');
-      const settingsDoc = await getDoc(settingsRef);
-      
-      if (settingsDoc.exists()) {
-        const data = settingsDoc.data() as StoreSettings;
-        setSettings(prev => ({ ...prev, ...data }));
+      const settingsKey = `settings_${user.id}`;
+      const savedSettings = localStorage.getItem(settingsKey);
+
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        setSettings((prev) => ({ ...prev, ...parsed }));
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -77,14 +73,14 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const saveSettings = async () => {
+  const saveSettings = () => {
     if (!user) return;
-    
+
     setSaving(true);
     try {
-      const settingsRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'store');
-      await setDoc(settingsRef, settings, { merge: true });
-      
+      const settingsKey = `settings_${user.id}`;
+      localStorage.setItem(settingsKey, JSON.stringify(settings));
+
       setSaveMessage('Pengaturan berhasil disimpan!');
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
@@ -99,23 +95,27 @@ const SettingsPage: React.FC = () => {
   const handleInputChange = (field: string, value: any) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      setSettings(prev => ({
+      setSettings((prev) => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof StoreSettings] as any,
-          [child]: value
-        }
+          ...(prev[parent as keyof StoreSettings] as any),
+          [child]: value,
+        },
       }));
     } else {
-      setSettings(prev => ({
+      setSettings((prev) => ({
         ...prev,
-        [field]: value
+        [field]: value,
       }));
     }
   };
 
   const resetToDefaults = () => {
-    if (window.confirm('Yakin ingin mengembalikan ke pengaturan default? Semua perubahan akan hilang.')) {
+    if (
+      window.confirm(
+        'Yakin ingin mengembalikan ke pengaturan default? Semua perubahan akan hilang.'
+      )
+    ) {
       setSettings({
         storeName: 'POS Keren',
         storeAddress: '',
@@ -133,13 +133,15 @@ const SettingsPage: React.FC = () => {
         printerSettings: {
           paperSize: '80mm',
           copies: 1,
-          autoPrint: false
-        }
+          autoPrint: false,
+        },
       });
     }
   };
 
-  const handleResetData = async (type: 'products' | 'customers' | 'sales' | 'settings' | 'all') => {
+  const handleResetData = async (
+    type: 'products' | 'customers' | 'sales' | 'settings' | 'all'
+  ) => {
     if (!user) return;
 
     let confirmMessage = '';
@@ -151,13 +153,16 @@ const SettingsPage: React.FC = () => {
         confirmMessage = 'Yakin ingin menghapus SEMUA PELANGGAN? Data ini tidak dapat dikembalikan!';
         break;
       case 'sales':
-        confirmMessage = 'Yakin ingin menghapus SEMUA DATA PENJUALAN? Data ini tidak dapat dikembalikan!';
+        confirmMessage =
+          'Yakin ingin menghapus SEMUA DATA PENJUALAN? Data ini tidak dapat dikembalikan!';
         break;
       case 'settings':
-        confirmMessage = 'Yakin ingin reset SEMUA PENGATURAN ke default? Pengaturan custom akan hilang!';
+        confirmMessage =
+          'Yakin ingin reset SEMUA PENGATURAN ke default? Pengaturan custom akan hilang!';
         break;
       case 'all':
-        confirmMessage = 'PERINGATAN! Ini akan menghapus SEMUA DATA (produk, pelanggan, penjualan, pengaturan). Data tidak dapat dikembalikan! Ketik "HAPUS SEMUA" untuk konfirmasi.';
+        confirmMessage =
+          'PERINGATAN! Ini akan menghapus SEMUA DATA (produk, pelanggan, penjualan, pengaturan). Data tidak dapat dikembalikan! Ketik "HAPUS SEMUA" untuk konfirmasi.';
         break;
     }
 
@@ -175,42 +180,22 @@ const SettingsPage: React.FC = () => {
 
     setSaving(true);
     try {
-      const batch = writeBatch(db);
-      const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
-
       if (type === 'products' || type === 'all') {
-        // Get all products and delete them
-        const productsRef = collection(db, 'artifacts', appId, 'users', user.uid, 'products');
-        const productsSnapshot = await getDocs(productsRef);
-        productsSnapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-        });
+        await supabase.from('products').delete().eq('user_id', user.id);
       }
 
       if (type === 'customers' || type === 'all') {
-        // Get all customers and delete them
-        const customersRef = collection(db, 'artifacts', appId, 'users', user.uid, 'customers');
-        const customersSnapshot = await getDocs(customersRef);
-        customersSnapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-        });
+        await supabase.from('customers').delete().eq('user_id', user.id);
       }
 
       if (type === 'sales' || type === 'all') {
-        // Get all sales and delete them
-        const salesRef = collection(db, 'artifacts', appId, 'users', user.uid, 'sales');
-        const salesSnapshot = await getDocs(salesRef);
-        salesSnapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-        });
+        await supabase.from('sales').delete().eq('user_id', user.id);
       }
 
       if (type === 'settings' || type === 'all') {
-        // Reset settings to default
-        const settingsRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'store');
-        batch.delete(settingsRef);
-        
-        // Reset local settings state
+        const settingsKey = `settings_${user.id}`;
+        localStorage.removeItem(settingsKey);
+
         setSettings({
           storeName: 'POS Keren',
           storeAddress: '',
@@ -228,12 +213,10 @@ const SettingsPage: React.FC = () => {
           printerSettings: {
             paperSize: '80mm',
             copies: 1,
-            autoPrint: false
-          }
+            autoPrint: false,
+          },
         });
       }
-
-      await batch.commit();
 
       let successMessage = '';
       switch (type) {
@@ -257,13 +240,11 @@ const SettingsPage: React.FC = () => {
       setSaveMessage(successMessage);
       setTimeout(() => setSaveMessage(''), 3000);
 
-      // Refresh page for 'all' reset to ensure clean state
       if (type === 'all') {
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       }
-
     } catch (error) {
       console.error('Error resetting data:', error);
       setSaveMessage('Gagal melakukan reset data');
@@ -272,7 +253,7 @@ const SettingsPage: React.FC = () => {
       setSaving(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -283,7 +264,6 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-white p-6 rounded-xl shadow-sm">
         <div className="flex justify-between items-center">
           <div>
@@ -316,20 +296,23 @@ const SettingsPage: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         {saveMessage && (
-          <div className={`mt-4 p-3 rounded-lg ${
-            saveMessage.includes('berhasil') 
-              ? 'bg-green-100 text-green-800 border border-green-200' 
-              : 'bg-red-100 text-red-800 border border-red-200'
-          }`}>
-            <i className={`fas ${saveMessage.includes('berhasil') ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2`}></i>
+          <div
+            className={`mt-4 p-3 rounded-lg ${
+              saveMessage.includes('berhasil')
+                ? 'bg-green-100 text-green-800 border border-green-200'
+                : 'bg-red-100 text-red-800 border border-red-200'
+            }`}
+          >
+            <i
+              className={`fas ${saveMessage.includes('berhasil') ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2`}
+            ></i>
             {saveMessage}
           </div>
         )}
       </div>
 
-      {/* Tab Navigation */}
       <div className="bg-white rounded-xl shadow-sm">
         <div className="border-b border-slate-200">
           <nav className="flex space-x-8 px-6" aria-label="Tabs">
@@ -337,7 +320,7 @@ const SettingsPage: React.FC = () => {
               { id: 'store', label: 'Info Toko', icon: 'fas fa-store' },
               { id: 'display', label: 'Tampilan', icon: 'fas fa-palette' },
               { id: 'receipt', label: 'Struk & Print', icon: 'fas fa-receipt' },
-              { id: 'system', label: 'Sistem', icon: 'fas fa-cog' }
+              { id: 'system', label: 'Sistem', icon: 'fas fa-cog' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -356,7 +339,6 @@ const SettingsPage: React.FC = () => {
         </div>
 
         <div className="p-6">
-          {/* Store Info Tab */}
           {activeTab === 'store' && (
             <div className="space-y-6">
               <div>
@@ -374,7 +356,7 @@ const SettingsPage: React.FC = () => {
                       placeholder="Nama toko Anda"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       No. Telepon
@@ -387,7 +369,7 @@ const SettingsPage: React.FC = () => {
                       placeholder="08123456789"
                     />
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Alamat Toko
@@ -400,7 +382,7 @@ const SettingsPage: React.FC = () => {
                       placeholder="Alamat lengkap toko"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Email Toko
@@ -413,7 +395,7 @@ const SettingsPage: React.FC = () => {
                       placeholder="email@toko.com"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       URL Logo
@@ -433,16 +415,16 @@ const SettingsPage: React.FC = () => {
               </div>
             </div>
           )}
-          {/* Display Tab */}
+
           {activeTab === 'display' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Pengaturan Tampilan</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                  Pengaturan Tampilan
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Tema
-                    </label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Tema</label>
                     <select
                       value={settings.theme}
                       onChange={(e) => handleInputChange('theme', e.target.value)}
@@ -453,7 +435,7 @@ const SettingsPage: React.FC = () => {
                       <option value="auto">Otomatis</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Rate Pajak Default (%)
@@ -461,14 +443,16 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="number"
                       value={settings.taxRate}
-                      onChange={(e) => handleInputChange('taxRate', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleInputChange('taxRate', parseFloat(e.target.value) || 0)
+                      }
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       min="0"
                       max="100"
                       step="0.1"
                     />
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Warna Tema Aplikasi
@@ -495,14 +479,13 @@ const SettingsPage: React.FC = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {/* Preset Colors */}
                         {[
                           { name: 'Indigo', color: '#6366f1' },
                           { name: 'Blue', color: '#3b82f6' },
                           { name: 'Green', color: '#10b981' },
                           { name: 'Purple', color: '#8b5cf6' },
                           { name: 'Pink', color: '#ec4899' },
-                          { name: 'Red', color: '#ef4444' }
+                          { name: 'Red', color: '#ef4444' },
                         ].map((preset) => (
                           <button
                             key={preset.name}
@@ -520,11 +503,12 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Receipt & Print Tab */}
           {activeTab === 'receipt' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Pengaturan Struk & Print</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                  Pengaturan Struk & Print
+                </h3>
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -538,7 +522,7 @@ const SettingsPage: React.FC = () => {
                       placeholder="Pesan yang akan muncul di bagian bawah struk"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -546,7 +530,9 @@ const SettingsPage: React.FC = () => {
                       </label>
                       <select
                         value={settings.printerSettings.paperSize}
-                        onChange={(e) => handleInputChange('printerSettings.paperSize', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange('printerSettings.paperSize', e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       >
                         <option value="58mm">58mm</option>
@@ -554,7 +540,7 @@ const SettingsPage: React.FC = () => {
                         <option value="A4">A4</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
                         Jumlah Salinan
@@ -562,22 +548,29 @@ const SettingsPage: React.FC = () => {
                       <input
                         type="number"
                         value={settings.printerSettings.copies}
-                        onChange={(e) => handleInputChange('printerSettings.copies', parseInt(e.target.value) || 1)}
+                        onChange={(e) =>
+                          handleInputChange('printerSettings.copies', parseInt(e.target.value) || 1)
+                        }
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         min="1"
                         max="5"
                       />
                     </div>
-                    
+
                     <div className="flex items-center">
                       <input
                         type="checkbox"
                         id="autoPrint"
                         checked={settings.printerSettings.autoPrint}
-                        onChange={(e) => handleInputChange('printerSettings.autoPrint', e.target.checked)}
+                        onChange={(e) =>
+                          handleInputChange('printerSettings.autoPrint', e.target.checked)
+                        }
                         className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
                       />
-                      <label htmlFor="autoPrint" className="ml-2 text-sm font-medium text-slate-700">
+                      <label
+                        htmlFor="autoPrint"
+                        className="ml-2 text-sm font-medium text-slate-700"
+                      >
                         Auto Print Struk
                       </label>
                     </div>
@@ -587,7 +580,6 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
 
-          {/* System Tab */}
           {activeTab === 'system' && (
             <div className="space-y-6">
               <div>
@@ -601,7 +593,9 @@ const SettingsPage: React.FC = () => {
                       <input
                         type="number"
                         value={settings.lowStockAlert}
-                        onChange={(e) => handleInputChange('lowStockAlert', parseInt(e.target.value) || 5)}
+                        onChange={(e) =>
+                          handleInputChange('lowStockAlert', parseInt(e.target.value) || 5)
+                        }
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         min="1"
                         max="100"
@@ -610,7 +604,7 @@ const SettingsPage: React.FC = () => {
                         Peringatan akan muncul jika stok produk kurang dari nilai ini
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center">
                       <input
                         type="checkbox"
@@ -619,22 +613,25 @@ const SettingsPage: React.FC = () => {
                         onChange={(e) => handleInputChange('autoBackup', e.target.checked)}
                         className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
                       />
-                      <label htmlFor="autoBackup" className="ml-2 text-sm font-medium text-slate-700">
+                      <label
+                        htmlFor="autoBackup"
+                        className="ml-2 text-sm font-medium text-slate-700"
+                      >
                         Auto Backup Harian
                       </label>
                     </div>
                   </div>
-                  
-                  {/* Reset Data Section */}
+
                   <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                     <h4 className="font-semibold text-red-800 mb-4 flex items-center">
                       <i className="fas fa-exclamation-triangle mr-2"></i>
                       Reset Data (Berbahaya)
                     </h4>
                     <p className="text-sm text-red-700 mb-4">
-                      Fitur ini akan menghapus data secara permanen. Pastikan Anda sudah backup data sebelum melakukan reset.
+                      Fitur ini akan menghapus data secara permanen. Pastikan Anda sudah backup
+                      data sebelum melakukan reset.
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <button
                         onClick={() => handleResetData('products')}
@@ -643,7 +640,7 @@ const SettingsPage: React.FC = () => {
                         <i className="fas fa-box mr-2"></i>
                         Reset Produk
                       </button>
-                      
+
                       <button
                         onClick={() => handleResetData('customers')}
                         className="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
@@ -651,7 +648,7 @@ const SettingsPage: React.FC = () => {
                         <i className="fas fa-users mr-2"></i>
                         Reset Pelanggan
                       </button>
-                      
+
                       <button
                         onClick={() => handleResetData('sales')}
                         className="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
@@ -659,7 +656,7 @@ const SettingsPage: React.FC = () => {
                         <i className="fas fa-chart-line mr-2"></i>
                         Reset Penjualan
                       </button>
-                      
+
                       <button
                         onClick={() => handleResetData('settings')}
                         className="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
@@ -668,7 +665,7 @@ const SettingsPage: React.FC = () => {
                         Reset Pengaturan
                       </button>
                     </div>
-                    
+
                     <div className="mt-4 pt-4 border-t border-red-200">
                       <button
                         onClick={() => handleResetData('all')}
@@ -678,19 +675,30 @@ const SettingsPage: React.FC = () => {
                         RESET SEMUA DATA
                       </button>
                       <p className="text-xs text-red-600 mt-2 text-center">
-                        Ini akan menghapus SEMUA data termasuk produk, pelanggan, penjualan, dan pengaturan!
+                        Ini akan menghapus SEMUA data termasuk produk, pelanggan, penjualan, dan
+                        pengaturan!
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="bg-slate-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-slate-700 mb-2">Informasi Aplikasi</h4>
                     <div className="space-y-1 text-sm text-slate-600">
-                      <p><strong>Nama:</strong> POS & Inventory Management System</p>
-                      <p><strong>Versi:</strong> 2.0.0 (React Version)</p>
-                      <p><strong>Database:</strong> Firebase Firestore</p>
-                      <p><strong>Framework:</strong> React + TypeScript</p>
-                      <p><strong>User ID:</strong> {user?.uid}</p>
+                      <p>
+                        <strong>Nama:</strong> POS & Inventory Management System
+                      </p>
+                      <p>
+                        <strong>Versi:</strong> 2.0.0 (React Version)
+                      </p>
+                      <p>
+                        <strong>Database:</strong> Supabase PostgreSQL
+                      </p>
+                      <p>
+                        <strong>Framework:</strong> React + TypeScript
+                      </p>
+                      <p>
+                        <strong>User ID:</strong> {user?.id}
+                      </p>
                     </div>
                   </div>
                 </div>
