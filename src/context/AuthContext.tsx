@@ -5,8 +5,6 @@ import { supabase } from '../lib/supabase';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  trialStatus: 'trial' | 'active' | 'expired';
-  trialDaysLeft: number;
   logout: () => Promise<void>;
 }
 
@@ -15,8 +13,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [trialStatus, setTrialStatus] = useState<'trial' | 'active' | 'expired'>('trial');
-  const [trialDaysLeft, setTrialDaysLeft] = useState(7);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -34,8 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         handleUserSession(session.user);
       } else {
         setUser(null);
-        setTrialStatus('trial');
-        setTrialDaysLeft(7);
         setLoading(false);
       }
     });
@@ -62,33 +56,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: user.id,
             email: user.email,
             display_name: user.user_metadata?.display_name || '',
-            subscription_status: 'trial',
-            trial_start_date: new Date().toISOString(),
           });
 
         if (insertError) throw insertError;
-      }
-
-      const profileData = profile || {
-        subscription_status: 'trial',
-        trial_start_date: new Date().toISOString(),
-      };
-
-      const trialStartDate = new Date(profileData.trial_start_date || user.created_at);
-      const now = new Date();
-      const trialDays = 7;
-      const daysSinceCreation = (now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24);
-      const trialExpired = daysSinceCreation > trialDays;
-
-      if (profileData.subscription_status === 'active') {
-        setTrialStatus('active');
-        setTrialDaysLeft(0);
-      } else if (trialExpired) {
-        setTrialStatus('expired');
-        setTrialDaysLeft(0);
-      } else {
-        setTrialStatus('trial');
-        setTrialDaysLeft(Math.ceil(trialDays - daysSinceCreation));
       }
 
       setUser(user);
@@ -111,8 +81,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     loading,
-    trialStatus,
-    trialDaysLeft,
     logout,
   };
 

@@ -7,7 +7,6 @@ import AppLoader from './components/Common/AppLoader';
 import GlobalSearch from './components/Common/GlobalSearch';
 import KeyboardShortcutsHelp from './components/Common/KeyboardShortcutsHelp';
 import WelcomeModal from './components/Common/WelcomeModal';
-import SubscriptionModal from './components/Modals/SubscriptionModal';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { SettingsProvider } from './context/SettingsContext';
@@ -23,21 +22,12 @@ import SettingsPage from './components/Settings/SettingsPage';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 const AppContent: React.FC = () => {
-  const { user, loading, trialStatus } = useAuth();
+  const { user, loading } = useAuth();
   const { settings } = useSettings();
   const [currentPage, setCurrentPage] = useState('dashboard-page');
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
-
-  useEffect(() => {
-    if (trialStatus === 'expired') {
-      setShowSubscriptionModal(true);
-    } else {
-      setShowSubscriptionModal(false);
-    }
-  }, [trialStatus]);
 
   useEffect(() => {
     if (user) {
@@ -108,15 +98,6 @@ const AppContent: React.FC = () => {
 
   if (!user) {
     return <LandingPage />;
-  }
-
-  if (trialStatus === 'expired') {
-    return (
-      <SubscriptionModal
-        isOpen={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
-      />
-    );
   }
 
   const renderCurrentPage = () => {
